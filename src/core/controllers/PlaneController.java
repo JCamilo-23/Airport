@@ -7,6 +7,7 @@ package core.controllers;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Plane;
+import core.models.storage.PlaneStorage;
 
 /**
  *
@@ -26,10 +27,10 @@ public class PlaneController {
             }
 
             // Check ID uniqueness
-           // AirplaneStorage storage = AirplaneStorage.getInstance(); // Make sure AirplaneStorage exists
-            //if (storage.airplaneIdExists(idStr)) {
-            //    return new Response("An airplane with the ID '" + idStr + "' already exists.", Status.CONFLICT);
-            //}
+            PlaneStorage storage = PlaneStorage.getInstance(); // Make sure AirplaneStorage exists
+            if (storage.planeIdExists(idStr)) {
+                return new Response("An airplane with the ID '" + idStr + "' already exists.", Status.BAD_REQUEST);
+            }
 
             // 2. Brand validation
             if (brand == null || brand.trim().isEmpty()) {
@@ -63,10 +64,10 @@ public class PlaneController {
             // If all validations pass, create and save the airplane
             Plane newAirplane = new Plane(idStr, brand.trim(), model.trim(), maxCapacity, airline.trim());
             
-            //if (!storage.addAirplane(newAirplane)) {
+            if (!storage.addPlane(newAirplane)) {
                 // This case should ideally be caught by airplaneIdExists, but as a fallback
-            //    return new Response("Error saving airplane. The ID might have been registered simultaneously.", Status.CONFLICT);
-           // }
+                return new Response("Error saving airplane. The ID might have been registered simultaneously.", Status.BAD_REQUEST);
+            }
 
             return new Response("Airplane created successfully.", Status.CREATED, newAirplane);
 

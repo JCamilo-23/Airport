@@ -7,6 +7,7 @@ package core.controllers;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Location;
+import core.models.storage.LocationStorage;
 
 /**
  *
@@ -19,15 +20,16 @@ public class LocationController {
             if (airportId == null || airportId.trim().isEmpty()) {
                 return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
             }
+            
             airportId = airportId.trim().toUpperCase(); // Normalize
             if (!AIRPORT_ID_PATTERN.matcher(airportId).matches()) {
                 return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
             }
 
-            //AirportStorage storage = AirportStorage.getInstance();
-//            if (storage.airportIdExists(airportId)) {
-//                return new Response("An airport with ID '" + airportId + "' already exists.", Status.CONFLICT);
-//            }
+           LocationStorage storage = LocationStorage.getInstance();
+            if (storage.LocationIdExists(airportId)) {
+                return new Response("An airport with ID '" + airportId + "' already exists.", Status.BAD_REQUEST);
+            }
 
             // 2. Airport Name Validation
             if (airportName == null || airportName.trim().isEmpty()) {
@@ -85,11 +87,11 @@ public class LocationController {
             // If all validations pass:
             Location newLocation = new Location(airportId, airportName.trim(), airportCity.trim(), 
                                              airportCountry.trim(), latitude, longitude);
+            
+            if (!storage.addLocation(newLocation)) {
 
-//            if (!storage.addAirport(newLocation)) {
-//                // Should be caught by airportIdExists, but as a fallback
-//                return new Response("Error saving airport. ID conflict might have occurred.", Status.CONFLICT);
-//            }
+                return new Response("this Airplane already exists", Status.BAD_REQUEST);
+            }
 
             return new Response("Airport created successfully.", Status.CREATED, newLocation);
 

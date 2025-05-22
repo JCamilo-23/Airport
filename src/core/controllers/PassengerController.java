@@ -7,6 +7,7 @@ package core.controllers;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.person.Passenger;
+import core.models.storage.PassengerStorage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -41,10 +42,10 @@ public class PassengerController{
             }
 
             // Verify ID uniqueness
-//            Storage storage = Storage.getInstance();
-//            if (storage.passengerIdExists(id)) {
-//                return new Response("A passenger with the provided ID already exists.", Status.BAD_REQUEST);
-//            }
+            PassengerStorage storage = PassengerStorage.getInstance();
+            if (!storage.passengerIdExists(id)) {
+                return new Response("A passenger with the provided ID already exists.", Status.BAD_REQUEST);
+            }
 
             if (yearStr == null || yearStr.trim().isEmpty()) {
                 return new Response("Year must not be empty.", Status.BAD_REQUEST);
@@ -119,10 +120,10 @@ public class PassengerController{
             // If all validations pass, create and save the passenger
             Passenger newPassenger = new Passenger(id, firstName.trim(), lastName.trim(), dateOfBirth, phoneCode, phoneNumber, country.trim());
             
-//            if (!storage.addPassenger(newPassenger)) {
-//                // This case was already covered by passengerIdExists, but it's a double-check.
-//                return new Response("Error saving passenger, ID might be duplicated.", Status.BAD_REQUEST);
-//            }
+            if (!storage.addPassenger(newPassenger)) {
+                // This case was already covered by passengerIdExists, but it's a double-check.
+                return new Response("Error saving passenger, ID might be duplicated.", Status.BAD_REQUEST);
+            }
 
             return new Response("Passenger created successfully.", Status.CREATED, newPassenger);
 

@@ -40,19 +40,29 @@ public class PassengerStorage {
         return true;
     }
     
-    public Passenger getPassenger(int id) {
-        for (Passenger person : this.passengers) {
+    public Passenger getPassenger(long id) {
+       for (Passenger passenger : this.passengers) {
             if (passenger.getId() == id) {
-                return person;
+                return passenger;
             }
         }
         return null;
     }
     
-    public boolean deletePassenger(int id) {
+    public boolean deletePassenger(long id) {
         for (Passenger passenger : this.passengers) {
             if (passenger.getId() == id) {
                 this.passengers.remove(passenger);
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+   public boolean passengerIdExists(long id) {
+        for (Passenger p : this.passengers) {
+            if (p.getId() == id) {
                 return true;
             }
         }

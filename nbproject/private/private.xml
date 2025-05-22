@@ -9,11 +9,15 @@
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/FlightController.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/LocationController.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/PassengerController.java</file>
-            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/PlaneControllers.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/flight/ArrivalDate.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/flight/Register.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/utils/Add.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/main/Main.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/PlaneController.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/PassengerStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/LocationStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/PlaneStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/FlightStorage.java</file>
         </group>
     </open-files>
 </project-private>
