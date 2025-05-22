@@ -18,6 +18,10 @@
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/LocationStorage.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/PlaneStorage.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/FlightStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/flight/Flight.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/person/Passenger.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/Location.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/Plane.java</file>
         </group>
     </open-files>
 </project-private>
