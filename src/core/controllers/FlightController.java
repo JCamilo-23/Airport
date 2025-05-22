@@ -4,10 +4,17 @@
  */
 package core.controllers;
 
+import core.controllers.utils.Response;
+import core.models.Location;
+import core.models.Plane;
+import java.time.LocalDateTime;
+
 /**
  *
- * @author braya
+ * @author Admin
  */
 public class FlightController {
-    
+    public static Response createFlight(String id, Plane plane, Location departureLocation, Location arrivalLocation, LocalDateTime departureDate, String hoursDurationArrival, String minutesDurationArrival){
+        return null;
+    }
 }
