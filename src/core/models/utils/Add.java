@@ -4,10 +4,12 @@
  */
 package core.models.utils;
 
+import core.models.flight.Flight;
+
 /**
  *
- * @author braya
+ * @author Admin
  */
-public class Add {
-    
+public interface Add { 
+    public abstract void addFlight(Flight flight);
 }

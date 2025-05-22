@@ -4,10 +4,22 @@
  */
 package core.models.flight;
 
+import core.models.flight.Flight;
+import java.time.LocalDateTime;
+
 /**
  *
- * @author braya
+ * @author Admin
  */
-public class ArrivalDate {
+public class ArrivalDate{
     
+    private Flight flight;
+
+    public ArrivalDate(Flight flight) {
+        this.flight = flight;
+    }
+    
+    public LocalDateTime calculateArrivalDate() {
+        return flight.departureDate.plusHours(flight.hoursDurationScale).plusHours(flight.hoursDurationArrival).plusMinutes(flight.minutesDurationScale).plusMinutes(flight.minutesDurationArrival);
+    }
 }

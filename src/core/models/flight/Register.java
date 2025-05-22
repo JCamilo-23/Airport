@@ -4,10 +4,23 @@
  */
 package core.models.flight;
 
+import core.models.flight.Flight;
+import core.models.person.Passenger;
+import java.time.LocalDateTime;
+
 /**
  *
- * @author braya
+ * @author Admin
  */
-public class Register {
+public class Register{
     
+    private Flight flight;
+
+    public Register(Flight flight) {
+        this.flight = flight;
+    }
+    
+    public void addPassenger(Passenger passenger) {
+        flight.passengers.add(passenger);
+    }
 }
