@@ -13,12 +13,17 @@ import core.models.Location;
 import core.controllers.PassengerController;
 import core.controllers.PlaneController;
 import core.controllers.utils.Response;
+import core.controllers.utils.Status;
+import core.models.storage.PassengerStorage;
 import java.awt.Color;
+import java.awt.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
 
 /**
  *
@@ -425,38 +430,38 @@ public class AirportFrame extends javax.swing.JFrame {
 
         airplaneIdTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneIdTextField);
-        airplaneIdTextField.setBounds(180, 93, 130, 31);
+        airplaneIdTextField.setBounds(180, 93, 130, 35);
 
         jLabel12.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel12.setText("Brand:");
         jPanel3.add(jLabel12);
-        jLabel12.setBounds(53, 157, 50, 25);
+        jLabel12.setBounds(53, 157, 52, 25);
 
         airplaneBrandTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneBrandTextField);
-        airplaneBrandTextField.setBounds(180, 154, 130, 31);
+        airplaneBrandTextField.setBounds(180, 154, 130, 35);
 
         airplaneModelTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneModelTextField);
-        airplaneModelTextField.setBounds(180, 213, 130, 31);
+        airplaneModelTextField.setBounds(180, 213, 130, 35);
 
         jLabel13.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel13.setText("Model:");
         jPanel3.add(jLabel13);
-        jLabel13.setBounds(53, 216, 55, 25);
+        jLabel13.setBounds(53, 216, 57, 25);
 
         airplaneMaxCapacityTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneMaxCapacityTextField);
-        airplaneMaxCapacityTextField.setBounds(180, 273, 130, 31);
+        airplaneMaxCapacityTextField.setBounds(180, 273, 130, 35);
 
         jLabel14.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel14.setText("Max Capacity:");
         jPanel3.add(jLabel14);
-        jLabel14.setBounds(53, 276, 109, 25);
+        jLabel14.setBounds(53, 276, 114, 25);
 
         airplaneAirlineTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneAirlineTextField);
-        airplaneAirlineTextField.setBounds(180, 333, 130, 31);
+        airplaneAirlineTextField.setBounds(180, 333, 130, 35);
 
         jLabel15.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel15.setText("Airline:");
@@ -1390,7 +1395,7 @@ public class AirportFrame extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Delay flight", jPanel12);
 
-        panelRound1.add(jTabbedPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 41, 1150, 620));
+        panelRound1.add(jTabbedPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 1150, 620));
 
         javax.swing.GroupLayout panelRound3Layout = new javax.swing.GroupLayout(panelRound3);
         panelRound3.setLayout(panelRound3Layout);
@@ -1655,58 +1660,23 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_delayFlightButtonActionPerformed
 
     private void refreshMyFlightsTableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshMyFlightsTableButtonActionPerformed
-        // TODO add your handling code here:
-        long passengerId = Long.parseLong(userSelect.getItemAt(userSelect.getSelectedIndex()));
 
-        Passenger passenger = null;
-        for (Passenger p : this.passengers) {
-            if (p.getId() == passengerId) {
-                passenger = p;
-            }
-        }
-
-        ArrayList<Flight> flights = passenger.getFlights();
-        DefaultTableModel model = (DefaultTableModel) myFlightsTable.getModel();
-        model.setRowCount(0);
-//        for (Flight flight : flights) {
-//            model.addRow(new Object[]{flight.getId(), flight.getDepartureDate(), ArrivalDate.calculateArrivalDate()});
-//        }
     }//GEN-LAST:event_refreshMyFlightsTableButtonActionPerformed
 
     private void refreshAllPassengersTableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllPassengersTableButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allPassengersTable.getModel();
-        model.setRowCount(0);
-        for (Passenger passenger : this.passengers) {
-            model.addRow(new Object[]{passenger.getId(), passenger.getFullname(), passenger.getBirthDate(), passenger.calculateAge(), passenger.generateFullPhone(), passenger.getCountry(), passenger.getNumFlights()});
-        }
+   
     }//GEN-LAST:event_refreshAllPassengersTableButtonActionPerformed
 
     private void refreshAllFlightsTableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllFlightsTableButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allFlightsTable.getModel();
-        model.setRowCount(0);
-//        for (Flight flight : this.flights) {
-//            model.addRow(new Object[]{flight.getId(), flight.getDepartureLocation().getAirportId(), flight.getArrivalLocation().getAirportId(), (flight.getScaleLocation() == null ? "-" : flight.getScaleLocation().getAirportId()), flight.getDepartureDate(), ArrivalDate.calculateArrivalDate(), flight.getPlane().getId(), flight.getNumPassengers()});
-//        }
+        
     }//GEN-LAST:event_refreshAllFlightsTableButtonActionPerformed
 
     private void refreshAllPlanesTableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllPlanesTableButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allPlanesTable.getModel();
-        model.setRowCount(0);
-        for (Plane plane : this.planes) {
-            model.addRow(new Object[]{plane.getId(), plane.getBrand(), plane.getModel(), plane.getMaxCapacity(), plane.getAirline(), plane.getNumFlights()});
-        }
+     
     }//GEN-LAST:event_refreshAllPlanesTableButtonActionPerformed
 
     private void refreshAllLocationsTableButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllLocationsTableButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allLocationsTable.getModel();
-        model.setRowCount(0);
-        for (Location location : this.locations) {
-            model.addRow(new Object[]{location.getAirportId(), location.getAirportName(), location.getAirportCity(), location.getAirportCountry()});
-        }
+  
     }//GEN-LAST:event_refreshAllLocationsTableButtonActionPerformed
 
     private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
@@ -1890,4 +1860,6 @@ public class AirportFrame extends javax.swing.JFrame {
     private javax.swing.JRadioButton user;
     private javax.swing.JComboBox<String> userSelect;
     // End of variables declaration//GEN-END:variables
+
+
 }

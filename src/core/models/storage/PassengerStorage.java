@@ -69,9 +69,7 @@ public class PassengerStorage {
         return false;
     }
 
-    public ArrayList<Passenger> getPassengers() {
-        return passengers;
-    }
-   
-   
+   public ArrayList<Passenger> getPassengers() { 
+        return new ArrayList<>(this.passengers); 
+   } 
 }
