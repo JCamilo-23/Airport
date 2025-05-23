@@ -8,6 +8,7 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Location;
 import core.models.storage.LocationStorage;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -22,10 +23,10 @@ public class LocationController {
             }
             
             airportId = airportId.trim().toUpperCase(); // Normalize
-            if (!AIRPORT_ID_PATTERN.matcher(airportId).matches()) {
+            if (!Pattern.compile("[A-Z]{3}").matcher(airportId).matches()) {
                 return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
             }
-
+            
            LocationStorage storage = LocationStorage.getInstance();
             if (storage.LocationIdExists(airportId)) {
                 return new Response("An airport with ID '" + airportId + "' already exists.", Status.BAD_REQUEST);
@@ -99,6 +100,17 @@ public class LocationController {
             // Log ex.printStackTrace(); for debugging
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
+    }
+     private static boolean hasAtMostFourDecimalPlaces(String valueStr) {
+        if (valueStr.contains(".")) {
+            // Check for scientific notation which is invalid for this format
+            if (valueStr.toLowerCase().contains("e")) {
+                return false;
+            }
+            String decimalPart = valueStr.substring(valueStr.indexOf(".") + 1);
+            return decimalPart.length() <= 4 && decimalPart.matches("[0-9]+"); // Ensure decimal part is only digits
+        }
+        return true; // No decimal part means 0 decimal places, which is valid
     }
 }
 

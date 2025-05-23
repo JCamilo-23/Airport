@@ -4,23 +4,19 @@
  */
 package core.models.flight;
 
-import core.models.flight.Flight;
-import core.models.person.Passenger;
-import java.time.LocalDateTime;
-
 /**
  *
  * @author Admin
  */
-public class Register{
-    
+public class Delay {
     private Flight flight;
 
-    public Register(Flight flight) {
+    public Delay(Flight flight) {
         this.flight = flight;
     }
     
-    public void addPassenger(Passenger passenger) {
-        flight.passengers.add(passenger);
+    public void delay(int hours, int minutes) {
+        flight.setDepartureDate(flight.getDepartureDate().plusHours(hours).plusMinutes(minutes));
     }
+    
 }

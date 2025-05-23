@@ -30,7 +30,7 @@ public class LocationStorage {
 
     public boolean addLocation(Location location) {
         for (Location l : this.locations) {
-            if (l.getAirportId() == location.getAirportId()) {
+            if (l.getAirportId() == (location.getAirportId())) {
                 return false; 
             }
         }
@@ -40,7 +40,7 @@ public class LocationStorage {
 
     public Location getLocation(String id) {
         for (Location loc : this.locations) {
-            if (loc.getAirportId() == id) {
+            if (loc.getAirportId().equals(id)) {
                 return loc;
             }
         }
@@ -64,5 +64,9 @@ public class LocationStorage {
             }
         }
         return false;
+    }
+
+    public ArrayList<Location> getLocations() {
+        return locations;
     }
 }

@@ -20,6 +20,6 @@ public class ArrivalDate{
     }
     
     public LocalDateTime calculateArrivalDate() {
-        return flight.departureDate.plusHours(flight.hoursDurationScale).plusHours(flight.hoursDurationArrival).plusMinutes(flight.minutesDurationScale).plusMinutes(flight.minutesDurationArrival);
+        return flight.getDepartureDate().plusHours(flight.getHoursDurationScale()).plusHours(flight.getHoursDurationArrival()).plusMinutes(flight.getMinutesDurationScale()).plusMinutes(flight.getMinutesDurationArrival());
     }
 }

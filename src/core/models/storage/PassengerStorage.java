@@ -68,4 +68,10 @@ public class PassengerStorage {
         }
         return false;
     }
+
+    public ArrayList<Passenger> getPassengers() {
+        return passengers;
+    }
+   
+   
 }

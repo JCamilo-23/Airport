@@ -38,7 +38,7 @@ public class PlaneStorage {
 
     public Plane getPlane(String id) {
         for (Plane p : this.planes) {
-            if (p.getId() == id) {
+            if (p.getId().equals(id)) {
                 return p;
             }
         }
@@ -62,5 +62,9 @@ public class PlaneStorage {
             }
         }
         return false;
+    }
+
+    public ArrayList<Plane> getPlanes() {
+        return planes;
     }
 }

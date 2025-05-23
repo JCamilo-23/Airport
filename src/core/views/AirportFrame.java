@@ -4,6 +4,7 @@
  */
 package core.views;
 
+import core.controllers.FlightController;
 import core.controllers.LocationController;
 import core.models.Plane;
 import core.models.person.Passenger;
@@ -424,38 +425,38 @@ public class AirportFrame extends javax.swing.JFrame {
 
         airplaneIdTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneIdTextField);
-        airplaneIdTextField.setBounds(180, 93, 130, 35);
+        airplaneIdTextField.setBounds(180, 93, 130, 31);
 
         jLabel12.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel12.setText("Brand:");
         jPanel3.add(jLabel12);
-        jLabel12.setBounds(53, 157, 52, 25);
+        jLabel12.setBounds(53, 157, 50, 25);
 
         airplaneBrandTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneBrandTextField);
-        airplaneBrandTextField.setBounds(180, 154, 130, 35);
+        airplaneBrandTextField.setBounds(180, 154, 130, 31);
 
         airplaneModelTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneModelTextField);
-        airplaneModelTextField.setBounds(180, 213, 130, 35);
+        airplaneModelTextField.setBounds(180, 213, 130, 31);
 
         jLabel13.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel13.setText("Model:");
         jPanel3.add(jLabel13);
-        jLabel13.setBounds(53, 216, 57, 25);
+        jLabel13.setBounds(53, 216, 55, 25);
 
         airplaneMaxCapacityTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneMaxCapacityTextField);
-        airplaneMaxCapacityTextField.setBounds(180, 273, 130, 35);
+        airplaneMaxCapacityTextField.setBounds(180, 273, 130, 31);
 
         jLabel14.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel14.setText("Max Capacity:");
         jPanel3.add(jLabel14);
-        jLabel14.setBounds(53, 276, 114, 25);
+        jLabel14.setBounds(53, 276, 109, 25);
 
         airplaneAirlineTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jPanel3.add(airplaneAirlineTextField);
-        airplaneAirlineTextField.setBounds(180, 333, 130, 35);
+        airplaneAirlineTextField.setBounds(180, 333, 130, 31);
 
         jLabel15.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel15.setText("Airline:");
@@ -812,6 +813,11 @@ public class AirportFrame extends javax.swing.JFrame {
         updateInfoPassengerIdTextField.setEditable(false);
         updateInfoPassengerIdTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         updateInfoPassengerIdTextField.setEnabled(false);
+        updateInfoPassengerIdTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                updateInfoPassengerIdTextFieldActionPerformed(evt);
+            }
+        });
 
         jLabel37.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel37.setText("First Name:");
@@ -958,6 +964,11 @@ public class AirportFrame extends javax.swing.JFrame {
 
         addToFlightSelectionComboBox.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         addToFlightSelectionComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Flight" }));
+        addToFlightSelectionComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addToFlightSelectionComboBoxActionPerformed(evt);
+            }
+        });
 
         addPassengerToFlightButton.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         addPassengerToFlightButton.setText("Add");
@@ -1432,6 +1443,12 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_administratorActionPerformed
 
     private void userActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userActionPerformed
+        for(String s:PassengerController.storageDownload()){
+            userSelect.addItem(s);
+        }
+        for(String f:FlightController.storageDownload()){
+            addToFlightSelectionComboBox.addItem(f);
+        }
         if (administrator.isSelected()) {
             administrator.setSelected(false);
         }
@@ -1470,7 +1487,7 @@ public class AirportFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
         }
         
-        this.userSelect.addItem("" + id);
+        this.userSelect.addItem(id);
     }//GEN-LAST:event_registerPassengerButtonActionPerformed
 
     private void createAirplaneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createAirplaneButtonActionPerformed
@@ -1718,6 +1735,14 @@ public class AirportFrame extends javax.swing.JFrame {
     private void passengerLastNameTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passengerLastNameTextFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_passengerLastNameTextFieldActionPerformed
+
+    private void updateInfoPassengerIdTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateInfoPassengerIdTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_updateInfoPassengerIdTextFieldActionPerformed
+
+    private void addToFlightSelectionComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToFlightSelectionComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addToFlightSelectionComboBoxActionPerformed
 
     /**
      * @param args the command line arguments

@@ -160,11 +160,11 @@ public class FlightController {
             }
 
             if (!flightStorage.addFlight(newFlight)) {
-                return new Response("Failed to save the flight. ID conflict might have occurred.", Status.CONFLICT);
+                return new Response("Failed to save the flight. ID conflict might have occurred.", Status.BAD_REQUEST);
             }
 
             // Return a copy of the created flight [cite: 40]
-            return new Response("Flight created successfully.", Status.CREATED, newFlight.clone()); // Assuming Flight has a clone() method
+            return new Response("Flight created successfully.", Status.CREATED); // Assuming Flight has a clone() method
 
         } catch (Exception ex) {
             // Log ex.printStackTrace(); for debugging
@@ -180,26 +180,20 @@ public class FlightController {
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight ID must not be empty.", Status.BAD_REQUEST);
             }
-            Flight flight = flightStorage.findFlightById(flightId.trim().toUpperCase());
+            Flight flight = flightStorage.getFlight(flightId.trim().toUpperCase());
             if (flight == null) {
                 return new Response("Flight with ID '" + flightId + "' not found.", Status.NOT_FOUND); // [cite: 33]
             }
 
-            Passenger passenger = passengerStorage.findPassengerById(passengerId);
+            Passenger passenger = passengerStorage.getPassenger(passengerId);
             if (passenger == null) {
                 return new Response("Passenger with ID '" + passengerId + "' not found.", Status.NOT_FOUND);
             }
 
             // Check if plane capacity is exceeded
             if (flight.getNumPassengers() >= flight.getPlane().getMaxCapacity()) {
-                return new Response("Flight is full. Cannot add more passengers.", Status.CONFLICT);
+                return new Response("Flight is full. Cannot add more passengers.", Status.BAD_REQUEST);
             }
-
-            // Check if passenger is already on the flight (optional, good practice)
-            if (flight.getPassengers().stream().anyMatch(p -> p.getId() == passengerId)) {
-                 return new Response("Passenger is already on this flight.", Status.CONFLICT);
-            }
-
 
             flight.addPassenger(passenger); // Assumes this method exists in Flight model
             passenger.addFlight(flight);   // Assumes this method exists in Passenger model
@@ -224,7 +218,7 @@ public class FlightController {
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight ID must not be empty.", Status.BAD_REQUEST);
             }
-            Flight flight = flightStorage.findFlightById(flightId.trim().toUpperCase());
+            Flight flight = flightStorage.getFlight(flightId.trim().toUpperCase());
             if (flight == null) {
                 return new Response("Flight with ID '" + flightId + "' not found.", Status.NOT_FOUND); // [cite: 34]
             }
@@ -248,7 +242,7 @@ public class FlightController {
             flight.delay(hours, minutes); // Assumes this method exists in Flight model
             // Persist changes if necessary (e.g., flightStorage.updateFlight(flight))
 
-            return new Response("Flight delayed successfully.", Status.OK, flight.clone()); // Return updated flight (copy) [cite: 40]
+            return new Response("Flight delayed successfully.", Status.OK); // Return updated flight (copy) [cite: 40]
 
         } catch (Exception ex) {
             // Log ex.printStackTrace();
@@ -261,7 +255,7 @@ public class FlightController {
      */
     public static Response getAllFlights() {
         try {
-            List<Flight> flights = flightStorage.getAllFlights();
+            ArrayList<Flight> flights = flightStorage.getFlights();
             if (flights == null) { // Should ideally return empty list from storage
                 flights = new ArrayList<>();
             }
@@ -269,12 +263,12 @@ public class FlightController {
             flights.sort(Comparator.comparing(Flight::getDepartureDate));
 
             // Return copies of flights [cite: 40]
-            List<Flight> flightCopies = new ArrayList<>();
-            for (Flight flight : flights) {
-                flightCopies.add(flight.clone()); // Assuming Flight has a clone() method
-            }
-            return new Response("Flights retrieved successfully.", Status.OK, flightCopies);
-
+//            ArrayList<Flight> flightCopies = new ArrayList<>();
+//            for (Flight flight : flights) {
+//                flightCopies.add(flight.clone()); // Assuming Flight has a clone() method
+//            }
+//            return new Response("Flights retrieved successfully.", Status.OK, flightCopies);
+              return new Response("Flights retrieved successfully.", Status.OK);
         } catch (Exception ex) {
             // Log ex.printStackTrace();
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
@@ -286,20 +280,20 @@ public class FlightController {
      */
     public static Response getFlightsForPassenger(long passengerId) {
         try {
-            Passenger passenger = passengerStorage.findPassengerById(passengerId);
+            Passenger passenger = passengerStorage.getPassenger(passengerId);
             if (passenger == null) {
                 return new Response("Passenger with ID '" + passengerId + "' not found.", Status.NOT_FOUND);
             }
 
-            List<Flight> flights = new ArrayList<>(passenger.getFlights()); // Get a mutable copy from passenger
+            ArrayList<Flight> flights = new ArrayList<>(passenger.getFlights()); // Get a mutable copy from passenger
             
             // Sort flights by departure date [cite: 39]
             flights.sort(Comparator.comparing(Flight::getDepartureDate));
 
             // Return copies of flights [cite: 40]
-            List<Flight> flightCopies = new ArrayList<>();
+            ArrayList<Flight> flightCopies = new ArrayList<>();
             for (Flight flight : flights) {
-                flightCopies.add(flight.clone()); // Assuming Flight has a clone() method
+//                flightCopies.add(flight.clone()); // Assuming Flight has a clone() method
             }
             return new Response("Passenger flights retrieved successfully.", Status.OK, flightCopies);
 
@@ -307,5 +301,14 @@ public class FlightController {
             // Log ex.printStackTrace();
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
+    }
+    public static ArrayList<String> storageDownload(){
+        FlightStorage storage = FlightStorage.getInstance();
+        ArrayList<String> idList = new ArrayList();
+        
+        for (Flight f : storage.getFlights()) {
+            idList.add(""+f.getId());
+        }
+        return idList;
     }
 }

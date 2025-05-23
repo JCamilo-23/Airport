@@ -65,4 +65,8 @@ import java.util.ArrayList;
         }
         return false;
     }
+
+    public ArrayList<Flight> getFlights() {
+        return flights;
+    }
 }

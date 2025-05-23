@@ -11,6 +11,7 @@ import core.models.storage.PassengerStorage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 
 /**
  *
@@ -43,7 +44,7 @@ public class PassengerController{
 
             // Verify ID uniqueness
             PassengerStorage storage = PassengerStorage.getInstance();
-            if (!storage.passengerIdExists(id)) {
+            if (storage.passengerIdExists(id)) {
                 return new Response("A passenger with the provided ID already exists.", Status.BAD_REQUEST);
             }
 
@@ -130,6 +131,14 @@ public class PassengerController{
         } catch (Exception ex) {
             return new Response("Unexpected server error: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
+    }
+    public static ArrayList<String> storageDownload(){
+        PassengerStorage storage = PassengerStorage.getInstance();
+        ArrayList<String> idList = new ArrayList();
+        for (Passenger s : storage.getPassengers()) {
+            idList.add(""+s.getId());
+        }
+        return idList;
     }
 }
 
