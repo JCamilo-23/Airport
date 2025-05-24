@@ -8,17 +8,19 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Location;
 import core.models.Plane;
+import core.models.flight.Delay;
 import core.models.flight.Flight;
 import core.models.person.Passenger;
 import core.models.storage.FlightStorage;
 import core.models.storage.LocationStorage;
 import core.models.storage.PassengerStorage;
 import core.models.storage.PlaneStorage;
-import java.awt.List;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.regex.Pattern;
+import javax.swing.JComboBox;
 
 /**
  *
@@ -45,9 +47,9 @@ public class FlightController {
     public static Response createFlight(String flightId, String planeId,
                                         String departureLocationId, String arrivalLocationId,
                                         String scaleLocationId, // Can be null or empty if no scale
-                                        LocalDateTime departureDateTime,
+                                        String year,String month, String day, String hour, String minutes,
                                         String leg1HoursStr, String leg1MinutesStr,
-                                        String leg2HoursStr, String leg2MinutesStr) { // leg2 durations are for scale-to-arrival
+                                        String leg2HoursStr, String leg2MinutesStr) { 
         try {
             // 1. Flight ID Validation
             if (flightId == null || flightId.trim().isEmpty()) {
@@ -106,11 +108,16 @@ public class FlightController {
             }
 
             // 6. Departure Date Validation
+            LocalDateTime departureDateTime;
+            try{
+                departureDateTime = LocalDateTime.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day), Integer.parseInt(hour), Integer.parseInt(minutes));
+                
+            }catch(DateTimeParseException e){
+                return new Response("Date must be in the format yyyy/mm/dd/hh:mm",Status.BAD_REQUEST);
+            }
             if (departureDateTime == null) {
                 return new Response("Departure date and time must not be empty.", Status.BAD_REQUEST);
             }
-            // Add more date validation if needed (e.g., not in the past, though PDF doesn't specify)
-
             // 7. Duration Parsing and Validation
             int leg1Hours, leg1Minutes, leg2Hours = 0, leg2Minutes = 0;
             try {
@@ -239,8 +246,8 @@ public class FlightController {
             }
 
 
-            flight.delay(hours, minutes); // Assumes this method exists in Flight model
-            // Persist changes if necessary (e.g., flightStorage.updateFlight(flight))
+            Delay delay = new Delay(flight);
+            delay.delay(hours, minutes);
 
             return new Response("Flight delayed successfully.", Status.OK); // Return updated flight (copy) [cite: 40]
 
@@ -249,10 +256,7 @@ public class FlightController {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    /**
-     * Gets all flights, ordered by departure date (oldest to newest). [cite: 38]
-     */
+    
     public static Response getAllFlights() {
         try {
             ArrayList<Flight> flights = flightStorage.getFlights();
@@ -302,13 +306,10 @@ public class FlightController {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-    public static ArrayList<String> storageDownload(){
+    public static void storageDownload(JComboBox jbox){
         FlightStorage storage = FlightStorage.getInstance();
-        ArrayList<String> idList = new ArrayList();
-        
         for (Flight f : storage.getFlights()) {
-            idList.add(""+f.getId());
+            jbox.addItem(""+f.getId());
         }
-        return idList;
     }
 }

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package core.controllers;
+package core.controllers.tables;
 
 import core.models.flight.Flight;
 import core.models.person.Passenger;
@@ -57,16 +57,15 @@ public class MyFlightsTableController {
                                                   flight.getDepartureDate().format(dateTimeFormatter) : "N/A";
 
                         String arrivalDateStr = "N/A";
-                        if (flight.getDepartureDate() != null && flight.getDurationHoursArrival() != null && flight.getDurationMinutesArrival() != null) {
-                           try {
+                         try {
                                LocalDateTime arrivalDateTime = flight.getDepartureDate()
-                                   .plusHours((long) flight.getDurationHoursArrival())
-                                   .plusMinutes((long) flight.getDurationMinutesArrival());
+                                   .plusHours((long) flight.getHoursDurationArrival())
+                                   .plusMinutes((long) flight.getMinutesDurationArrival());
                                arrivalDateStr = arrivalDateTime.format(dateTimeFormatter);
                            } catch (Exception e) {
                                System.err.println("Error calculando fecha de llegada para mis vuelos, vuelo " + flight.getId() + ": " + e.getMessage());
                            }
-                        }
+                        
                         model.addRow(new Object[]{flightId, departureDateStr, arrivalDateStr});
                     }
                 }
