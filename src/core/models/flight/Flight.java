@@ -7,6 +7,7 @@ package core.models.flight;
 import core.models.person.Passenger;
 import core.models.Plane;
 import core.models.Location;
+import core.models.Prototype;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
@@ -14,7 +15,7 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class Flight {
+public class Flight implements Prototype<Flight>{
     
     private final String id;
     private ArrayList<Passenger> passengers;
@@ -116,5 +117,18 @@ public class Flight {
     
     public int getNumPassengers() {
         return passengers.size();
+    }
+
+    @Override
+    public Flight clone() {
+        Flight clone;
+        if (scaleLocation == null) {
+            clone = new Flight(id, plane, departureLocation, arrivalLocation, departureDate, hoursDurationArrival, minutesDurationArrival);
+        } else {
+            clone = new Flight(id, plane, departureLocation, scaleLocation, arrivalLocation, departureDate, hoursDurationArrival, minutesDurationArrival, hoursDurationScale, minutesDurationScale);
+        }
+        
+        clone.passengers = new ArrayList<>(passengers);
+        return clone;
     }
 }

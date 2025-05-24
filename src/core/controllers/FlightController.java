@@ -302,7 +302,6 @@ public class FlightController {
             return new Response("Passenger flights retrieved successfully.", Status.OK, flightCopies);
 
         } catch (Exception ex) {
-            // Log ex.printStackTrace();
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
