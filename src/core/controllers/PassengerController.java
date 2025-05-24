@@ -6,12 +6,15 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.models.flight.Flight;
 import core.models.person.Passenger;
+import core.models.storage.FlightStorage;
 import core.models.storage.PassengerStorage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import javax.swing.JComboBox;
 
 /**
  *
@@ -117,14 +120,22 @@ public class PassengerController{
             return new Response("Unexpected server error: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-    public static ArrayList<String> storageDownload(){
-        PassengerStorage storage = PassengerStorage.getInstance();
-        ArrayList<String> idList = new ArrayList();
-        for (Passenger s : storage.getPassengers()) {
-            idList.add(""+s.getId());
+    public static Response asignFlight(String passengerId, String flightId){
+        FlightStorage storage = FlightStorage.getInstance();
+        //Verify the existance of the flight
+        Flight flight = storage.getFlight(flightId);
+        if (flight == null){
+            return new Response("Flight with ID "+flightId+" not found",Status.BAD_REQUEST);
         }
-        return idList;
+        //Verify de capacity of the flight
+        if(flight.getNumPassengers() == flight.getPlane().getMaxCapacity()){
+            return new Response("Flight is on max capacity",Status.BAD_REQUEST);
+        }
+        long passengerID = Long.parseLong(passengerId);
+        flight.addPassenger(PassengerStorage.getInstance().getPassenger(passengerID));
+        return new Response("Flight asign correctly",Status.CREATED);
     }
+
 
     public static Response getAllPassengers() {
         throw new UnsupportedOperationException("Not supported yet."); }
@@ -230,5 +241,14 @@ public class PassengerController{
         return new Response("Unexpected server error during update: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
     }
 }
+}
+
+
+    public static void storageDownload(JComboBox jbox){
+        PassengerStorage storage = PassengerStorage.getInstance();
+        for (Passenger s : storage.getPassengers()) {
+            jbox.addItem(""+s.getId());
+        }
+    }
 }
 

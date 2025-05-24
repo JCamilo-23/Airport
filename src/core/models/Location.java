@@ -8,7 +8,7 @@ package core.models;
  *
  * @author edangulo
  */
-public class Location {
+public class Location implements Prototype<Location>{
     
     private final String airportId;
     private String airportName;
@@ -49,5 +49,9 @@ public class Location {
     public double getAirportLongitude() {
         return airportLongitude;
     }
-    
+
+    @Override
+    public Location clone() {
+        return new Location(airportId, airportName, airportCity, airportCountry, airportLatitude, airportLongitude);
+    }
 }

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class Plane {
+public class Plane implements Prototype<Plane>{
     
     private final String id;
     private String brand;
@@ -59,6 +59,13 @@ public class Plane {
     
     public int getNumFlights() {
         return flights.size();
+    }
+
+    @Override
+    public Plane clone() {
+        Plane clone = new Plane(id, brand, model, maxCapacity, airline);
+        clone.getFlights().addAll(flights);
+        return clone;
     }
     
 }

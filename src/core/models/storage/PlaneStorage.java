@@ -13,7 +13,8 @@ import java.util.ArrayList;
  *
  * @author brayan
  */
-    public class PlaneStorage implements Subject { // 1. Implementar Subject
+
+    public class PlaneStorage implements Subject { 
     private static PlaneStorage instance;
     private ArrayList<Plane> planes;
     private final ArrayList<Observer> observers; // 2. Añadir lista de observadores (usando ArrayList)

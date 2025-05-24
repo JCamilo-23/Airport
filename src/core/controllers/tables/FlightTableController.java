@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package core.controllers;
+package core.controllers.tables;
 
 import core.models.flight.Flight;
 import core.models.storage.FlightStorage;
@@ -54,21 +54,20 @@ public class FlightTableController {
                                         flight.getDepartureDate().format(dateTimeFormatter) : "N/A";
 
                     String arrDateStr = "N/A";
-                    if (flight.getDepartureDate() != null && flight.getDurationHoursArrival() != null && flight.getDurationMinutesArrival() != null) {
+//                    if (flight.getDepartureDate() != null && flight.getHoursDurationArrival() != null && flight.getMinutesDurationArrival() != null) {
                        try {
                            LocalDateTime arrivalDateTime = flight.getDepartureDate()
-                               .plusHours((long) flight.getDurationHoursArrival())
-                               .plusMinutes((long) flight.getDurationMinutesArrival());
+                               .plusHours((long) flight.getHoursDurationArrival())
+                               .plusMinutes((long) flight.getMinutesDurationArrival());
                            arrDateStr = arrivalDateTime.format(dateTimeFormatter);
                        } catch (Exception e) {
                            System.err.println("Error calculando fecha de llegada para vuelo " + flight.getId() + ": " + e.getMessage());
                        }
-                    }
+                    
 
                     String planeIdStr = (flight.getPlane() != null && flight.getPlane().getId() != null) ?
                                         flight.getPlane().getId() : "N/A";
                     int numPassengers = flight.getNumPassengers();
-
                     model.addRow(new Object[]{
                         flightId, depAirportId, arrAirportId, scaleAirportId,
                         depDateStr, arrDateStr, planeIdStr, numPassengers

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package core.controllers;
+package core.controllers.tables;
 
 import core.models.person.Passenger;
 import core.models.storage.PassengerStorage;
@@ -17,11 +17,11 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author brayan
  */
-public class LocationTableController {
+public class PassengerTableController {
     private JTable passengerTable;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public LocationTableController(JTable passengerTable) {
+    public PassengerTableController(JTable passengerTable) {
         this.passengerTable = passengerTable;
     }
 
@@ -30,19 +30,23 @@ public class LocationTableController {
             System.err.println("Error: La JTable para pasajeros no ha sido asignada al controlador.");
             return;
         }
+        
         DefaultTableModel model = (DefaultTableModel) this.passengerTable.getModel();
+<<<<<<< HEAD:src/core/controllers/LocationTableController.java
         model.setRowCount(0); 
+=======
+        model.setRowCount(0); // Limpiar tabla
+>>>>>>> ab8b377ce42cb9fb2270a92c01ae7d6a12bba165:src/core/controllers/tables/PassengerTableController.java
         ArrayList<Passenger> allPassengers = PassengerStorage.getInstance().getPassengers(); //
 
         if (allPassengers != null) {
             for (Passenger passenger : allPassengers) {
                 if (passenger != null) {
                     String id = String.valueOf(passenger.getId());
-                    String name = (passenger.getFirstName() != null ? passenger.getFirstName() : "") + " " +
-                                  (passenger.getLastName() != null ? passenger.getLastName() : "");
+                    String name = passenger.getFullname();
                     String birthdate = (passenger.getBirthDate() != null) ?
                                        passenger.getBirthDate().format(dateFormatter) : "N/A";
-
+                    
                     String ageStr = "N/A";
                     if (passenger.getBirthDate() != null) {
                         try {
@@ -51,9 +55,7 @@ public class LocationTableController {
                             System.err.println("No se pudo determinar la edad para el pasajero " + id + ": " + e.getMessage());
                         }
                     }
-
-                    String phone = (passenger.getCountryPhoneCode() != 0 ? "+" + passenger.getCountryPhoneCode() : "") +
-                                   (passenger.getPhoneNumber() != 0 ? "-" + passenger.getPhoneNumber() : "N/A");
+                    String phone = passenger.generateFullPhone();
                     String country = passenger.getCountry() != null ? passenger.getCountry() : "N/A";
                     int numFlights = (passenger.getFlights() != null) ? passenger.getFlights().size() : 0;
 

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
     public boolean addFlight(Flight flight) {
         for (Flight f : this.flights) {
-            if (f.getId() == flight.getId()) {
+            if (f.getId().equals(flight.getId())) {
                 return false; 
             }
         }
@@ -41,7 +41,7 @@ import java.util.ArrayList;
 
     public Flight getFlight(String id) {
         for (Flight f : this.flights) {
-            if (f.getId() == id) {
+            if (f.getId().equals(id)) {
                 return f;
             }
         }
@@ -50,7 +50,7 @@ import java.util.ArrayList;
 
     public boolean deleteFlight(String id) {
         for (Flight flight : this.flights) {
-            if (flight.getId() == id) {
+            if (flight.getId().equals(id)) {
                 this.flights.remove(flight);
                 return true; 
             }
@@ -59,7 +59,7 @@ import java.util.ArrayList;
     }
     public boolean flightIdExists(String id) {
         for (Flight f : this.flights) {
-            if (f.getId() == id) {
+            if (f.getId().equals(id)) {
                 return true;
             }
         }

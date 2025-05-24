@@ -8,6 +8,8 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Plane;
 import core.models.storage.PlaneStorage;
+import java.util.ArrayList;
+import javax.swing.JComboBox;
 
 /**
  *
@@ -66,5 +68,10 @@ public class PlaneController {
         }
     
     }
-    
+    public static void storageDownload(JComboBox jbox){
+        PlaneStorage storage = PlaneStorage.getInstance();
+        for (Plane p : storage.getPlanes()) {
+            jbox.addItem(""+p.getId());
+        }
+    }
 }

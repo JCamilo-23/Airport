@@ -9,6 +9,7 @@ import core.controllers.utils.Status;
 import core.models.Location;
 import core.models.storage.LocationStorage;
 import java.util.regex.Pattern;
+import javax.swing.JComboBox;
 
 /**
  *
@@ -100,6 +101,12 @@ public class LocationController {
             return decimalPart.length() <= 4 && decimalPart.matches("[0-9]+"); 
         }
         return true; 
+    }
+     public static void storageDownload(JComboBox jbox){
+        LocationStorage storage = LocationStorage.getInstance();
+        for (Location loc : storage.getLocations()) {
+            jbox.addItem(""+loc.getAirportId());
+        }
     }
 }
 

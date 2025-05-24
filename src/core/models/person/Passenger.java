@@ -4,6 +4,7 @@
  */
 package core.models.person;
 
+import core.models.Prototype;
 import core.models.flight.Flight;
 import java.time.LocalDate;
 import java.time.Period;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class Passenger {
+public class Passenger implements Prototype<Passenger>{
     
     private final long id;
     private String firstname;
@@ -109,11 +110,15 @@ public class Passenger {
     
     public int getNumFlights() {
         return flights.size();
+    }    
+
+    @Override
+    public Passenger clone() {
+        Passenger clone = new Passenger(id, firstname, lastname, birthDate, countryPhoneCode, phone, country);
+        clone.getFlights().addAll(flights);
+        return clone;
     }
 
-    public Object getFirstName() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
     public Object getLastName() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
