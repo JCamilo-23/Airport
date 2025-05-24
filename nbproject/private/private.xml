@@ -26,6 +26,10 @@
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/FlightTableController.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/PlaneTableController.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/MyFlightsTableController.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/flight/Delay.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/LoadStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/patterns/Observer.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/patterns/Subject.java</file>
         </group>
     </open-files>
 </project-private>
