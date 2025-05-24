@@ -241,8 +241,6 @@ public class PassengerController{
         return new Response("Unexpected server error during update: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
     }
 }
-}
-
 
     public static void storageDownload(JComboBox jbox){
         PassengerStorage storage = PassengerStorage.getInstance();

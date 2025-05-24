@@ -34,8 +34,9 @@ public class FlightController {
     private static PassengerStorage passengerStorage = PassengerStorage.getInstance();
 
     private static final Pattern FLIGHT_ID_PATTERN = Pattern.compile("^[A-Z]{3}\\d{3}$");
-    public static Response createFlight(
-                                        String scaleLocationId, // Can be null or empty if no scale
+    public static Response createFlight(String flightId,String planeId,
+                                        String departureLocationId, String arrivalLocationId,
+                                        String scaleLocationId,
                                         String year,String month, String day, String hour, String minutes,
                                         String leg1HoursStr, String leg1MinutesStr,
                                         String leg2HoursStr, String leg2MinutesStr) { 
@@ -85,9 +86,6 @@ public class FlightController {
                     scaleLocation.getAirportId().equals(arrivalLocation.getAirportId())) {
                     return new Response("Scale location cannot be the same as departure or arrival location.", Status.BAD_REQUEST);
                 }
-            }
-            if (departureDateTime == null) {
-                return new Response("Departure date and time must not be empty.", Status.BAD_REQUEST);
             }
             LocalDateTime departureDateTime;
             try{
@@ -206,13 +204,11 @@ public class FlightController {
                  return new Response("Delay minutes must be less than 60.", Status.BAD_REQUEST);
             }
 
-            flight.delay(hours, minutes); 
-            return new Response("Flight delayed successfully.", Status.OK); 
             Delay delay = new Delay(flight);
             delay.delay(hours, minutes);
-            return new Response("Flight delayed successfully.", Status.OK); // Return updated flight (copy) [cite: 40]
-
-
+  
+            return new Response("Flight delayed successfully.", Status.OK); 
+            
         } catch (Exception ex) {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
