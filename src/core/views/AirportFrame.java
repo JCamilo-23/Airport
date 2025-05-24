@@ -1592,31 +1592,40 @@ public class AirportFrame extends javax.swing.JFrame {
 
     private void updatePassengerInfoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatePassengerInfoButtonActionPerformed
         // TODO add your handling code here:
-        long id = Long.parseLong(updateInfoPassengerIdTextField.getText());
-        String firstname = updateInfoFirstNameTextField.getText();
-        String lastname = updateInfoLastNameTextField.getText();
-        int year = Integer.parseInt(updateInfoBirthYearTextField.getText());
-        int month = Integer.parseInt(MONTH.getItemAt(MONTH5.getSelectedIndex()));
-        int day = Integer.parseInt(DAY.getItemAt(DAY5.getSelectedIndex()));
-        int phoneCode = Integer.parseInt(updateInfoPhoneAreaCodeTextField.getText());
-        long phone = Long.parseLong(updateInfoPhoneNumberTextField.getText());
+        String idStr = updateInfoPassengerIdTextField.getText();
+        String firstName = updateInfoFirstNameTextField.getText();
+        String lastName = updateInfoLastNameTextField.getText();
+        String yearStr = updateInfoBirthYearTextField.getText();
+        String monthStr = MONTH5.getItemAt(MONTH5.getSelectedIndex()); 
+        String dayStr = DAY5.getItemAt(DAY5.getSelectedIndex());     
+        String phoneCodeStr = updateInfoPhoneAreaCodeTextField.getText();
+        String phoneNumberStr = updateInfoPhoneNumberTextField.getText();
         String country = updateInfoCountryTextField.getText();
-
-        LocalDate birthDate = LocalDate.of(year, month, day);
-
-        Passenger passenger = null;
-        for (Passenger p : this.passengers) {
-            if (p.getId() == id) {
-                passenger = p;
-            }
+    
+        if (idStr == null || idStr.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Passenger ID is missing. Please select a passenger first.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
-        passenger.setFirstname(firstname);
-        passenger.setLastname(lastname);
-        passenger.setBirthDate(birthDate);
-        passenger.setCountryPhoneCode(phoneCode);
-        passenger.setPhone(phone);
-        passenger.setCountry(country);
+        Response response = PassengerController.updatePassenger(
+            idStr,
+            firstName,
+            lastName,
+            yearStr,
+            monthStr,
+            dayStr,
+            phoneCodeStr,
+            phoneNumberStr,
+            country
+        );
+    
+        if (response.getStatus() >= 500) { 
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) { 
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Validation Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else { 
+            JOptionPane.showMessageDialog(this, response.getMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
     }//GEN-LAST:event_updatePassengerInfoButtonActionPerformed
 
     private void addPassengerToFlightButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addPassengerToFlightButtonActionPerformed

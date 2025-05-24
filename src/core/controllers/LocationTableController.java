@@ -15,7 +15,7 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 public class LocationTableController {
     private JTable passengerTable;
@@ -31,8 +31,7 @@ public class LocationTableController {
             return;
         }
         DefaultTableModel model = (DefaultTableModel) this.passengerTable.getModel();
-        model.setRowCount(0); // Limpiar tabla
-
+        model.setRowCount(0); 
         ArrayList<Passenger> allPassengers = PassengerStorage.getInstance().getPassengers(); //
 
         if (allPassengers != null) {

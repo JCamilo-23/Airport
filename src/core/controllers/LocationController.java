@@ -17,12 +17,11 @@ import java.util.regex.Pattern;
 public class LocationController {
     public static Response createLocation(String airportId, String airportName, String airportCity, String airportCountry, String latitudeStr, String longitudeStr){
          try {
-            // 1. Airport ID Validation
             if (airportId == null || airportId.trim().isEmpty()) {
                 return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
             }
             
-            airportId = airportId.trim().toUpperCase(); // Normalize
+            airportId = airportId.trim().toUpperCase(); 
             if (!Pattern.compile("[A-Z]{3}").matcher(airportId).matches()) {
                 return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
             }
@@ -32,28 +31,23 @@ public class LocationController {
                 return new Response("An airport with ID '" + airportId + "' already exists.", Status.BAD_REQUEST);
             }
 
-            // 2. Airport Name Validation
             if (airportName == null || airportName.trim().isEmpty()) {
                 return new Response("Airport name must not be empty.", Status.BAD_REQUEST);
             }
 
-            // 3. Airport City Validation
             if (airportCity == null || airportCity.trim().isEmpty()) {
                 return new Response("Airport city must not be empty.", Status.BAD_REQUEST);
             }
 
-            // 4. Airport Country Validation
             if (airportCountry == null || airportCountry.trim().isEmpty()) {
                 return new Response("Airport country must not be empty.", Status.BAD_REQUEST);
             }
 
-            // 5. Latitude Validation
             if (latitudeStr == null || latitudeStr.trim().isEmpty()) {
                 return new Response("Latitude must not be empty.", Status.BAD_REQUEST);
             }
             double latitude;
             try {
-                // Trim before parsing
                 String trimmedLatitudeStr = latitudeStr.trim();
                 if (!hasAtMostFourDecimalPlaces(trimmedLatitudeStr)) {
                      return new Response("Latitude must have at most 4 decimal places and be a valid number format.", Status.BAD_REQUEST);
@@ -66,13 +60,11 @@ public class LocationController {
                 return new Response("Latitude must be a valid number.", Status.BAD_REQUEST);
             }
 
-            // 6. Longitude Validation
             if (longitudeStr == null || longitudeStr.trim().isEmpty()) {
                 return new Response("Longitude must not be empty.", Status.BAD_REQUEST);
             }
             double longitude;
             try {
-                // Trim before parsing
                 String trimmedLongitudeStr = longitudeStr.trim();
                  if (!hasAtMostFourDecimalPlaces(trimmedLongitudeStr)) {
                     return new Response("Longitude must have at most 4 decimal places and be a valid number format.", Status.BAD_REQUEST);
@@ -85,7 +77,6 @@ public class LocationController {
                 return new Response("Longitude must be a valid number.", Status.BAD_REQUEST);
             }
 
-            // If all validations pass:
             Location newLocation = new Location(airportId, airportName.trim(), airportCity.trim(), 
                                              airportCountry.trim(), latitude, longitude);
             
@@ -97,20 +88,18 @@ public class LocationController {
             return new Response("Airport created successfully.", Status.CREATED, newLocation);
 
         } catch (Exception ex) {
-            // Log ex.printStackTrace(); for debugging
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
      private static boolean hasAtMostFourDecimalPlaces(String valueStr) {
         if (valueStr.contains(".")) {
-            // Check for scientific notation which is invalid for this format
             if (valueStr.toLowerCase().contains("e")) {
                 return false;
             }
             String decimalPart = valueStr.substring(valueStr.indexOf(".") + 1);
-            return decimalPart.length() <= 4 && decimalPart.matches("[0-9]+"); // Ensure decimal part is only digits
+            return decimalPart.length() <= 4 && decimalPart.matches("[0-9]+"); 
         }
-        return true; // No decimal part means 0 decimal places, which is valid
+        return true; 
     }
 }
 

@@ -9,14 +9,13 @@ import java.util.ArrayList;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 
 public class PassengerStorage {
-    // Instancia Singleton
-    private static PassengerStorage instance;
     
-    // Atributos del Storage
+    private static PassengerStorage instance;
+
     private ArrayList<Passenger> passengers;
     
     private PassengerStorage() {
@@ -72,4 +71,12 @@ public class PassengerStorage {
    public ArrayList<Passenger> getPassengers() { 
         return new ArrayList<>(this.passengers); 
    } 
+
+    public Passenger getPassengerById(long idToUpdate) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public boolean updatePassenger(Passenger passengerToUpdate) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }

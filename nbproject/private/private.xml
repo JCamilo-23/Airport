@@ -22,6 +22,10 @@
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/Location.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/Plane.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/views/PanelRound.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/LocationTableController.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/FlightTableController.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/PlaneTableController.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/MyFlightsTableController.java</file>
         </group>
     </open-files>
 </project-private>

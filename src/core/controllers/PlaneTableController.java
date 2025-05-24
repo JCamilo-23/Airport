@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 public class PlaneTableController {
     private JTable planeTable;
@@ -30,11 +30,7 @@ public class PlaneTableController {
         }
         DefaultTableModel model = (DefaultTableModel) this.planeTable.getModel();
         model.setRowCount(0);
-
-        // Asunción: PlaneStorage tiene getPlanes()
-        ArrayList<Plane> allPlanes = PlaneStorage.getInstance().getPlanes(); //
-        // Para contar los vuelos por avión, necesitamos acceso a todos los vuelos.
-        // Asunción: FlightStorage tiene getFlights()
+        ArrayList<Plane> allPlanes = PlaneStorage.getInstance().getPlanes(); 
         ArrayList<Flight> allFlights = FlightStorage.getInstance().getFlights();
 
 

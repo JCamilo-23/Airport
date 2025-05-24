@@ -16,28 +16,21 @@ import core.models.storage.PlaneStorage;
 public class PlaneController {
     public static Response createPlane(String idStr, String brand, String model, String maxCapacityStr, String airline){
         try{
-            // 1. Airplane ID validation
             if (idStr == null || idStr.trim().isEmpty()) {
                 return new Response("Airplane ID must not be empty.", Status.BAD_REQUEST);
             }
             
-            idStr = idStr.trim().toUpperCase(); // Normalize ID to uppercase
+            idStr = idStr.trim().toUpperCase(); 
             if (!idStr.matches("[A-Z]{2}\\d{5}")) {
                 return new Response("Airplane ID must follow the format XXYYYYY (e.g., AA12345).", Status.BAD_REQUEST);
             }
-
-            // Check ID uniqueness
-            PlaneStorage storage = PlaneStorage.getInstance(); // Make sure AirplaneStorage exists
+            PlaneStorage storage = PlaneStorage.getInstance();
             if (storage.planeIdExists(idStr)) {
                 return new Response("An airplane with the ID '" + idStr + "' already exists.", Status.BAD_REQUEST);
             }
-
-            // 2. Brand validation
             if (brand == null || brand.trim().isEmpty()) {
                 return new Response("Airplane brand must not be empty.", Status.BAD_REQUEST);
             }
-
-            // 3. Model validation
             if (model == null || model.trim().isEmpty()) {
                 return new Response("Airplane model must not be empty.", Status.BAD_REQUEST);
             }
@@ -60,19 +53,15 @@ public class PlaneController {
             if (airline == null || airline.trim().isEmpty()) {
                 return new Response("Airline must not be empty.", Status.BAD_REQUEST);
             }
-
-            // If all validations pass, create and save the airplane
             Plane newAirplane = new Plane(idStr, brand.trim(), model.trim(), maxCapacity, airline.trim());
             
             if (!storage.addPlane(newAirplane)) {
-                // This case should ideally be caught by airplaneIdExists, but as a fallback
                 return new Response("Error saving airplane. The ID might have been registered simultaneously.", Status.BAD_REQUEST);
             }
 
             return new Response("Airplane created successfully.", Status.CREATED, newAirplane);
 
         } catch (Exception ex) {
-            // Log the error for debugging, e.g., ex.printStackTrace();
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     

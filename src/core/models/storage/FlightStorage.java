@@ -6,14 +6,14 @@ package core.models.storage;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 
 import core.models.flight.Flight;
 import java.util.ArrayList;
 
  public class FlightStorage {
-    // Instancia Singleton
+     
     private static FlightStorage instance;
 
     private ArrayList<Flight> flights;

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 public class LocationStorage {
     // Instancia Singleton
@@ -44,7 +44,7 @@ public class LocationStorage {
                 return loc;
             }
         }
-        return null; // Location not found
+        return null;
     }
 
     public boolean deleteLocation(String id) {

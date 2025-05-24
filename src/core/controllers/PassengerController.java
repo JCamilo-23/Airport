@@ -25,8 +25,6 @@ public class PassengerController{
             LocalDate dateOfBirth;
             int phoneCode;
             long phoneNumber;
-
-            // 1. Passenger ID validation
             if (idStr == null || idStr.trim().isEmpty()) {
                 return new Response("Passenger ID must not be empty.", Status.BAD_REQUEST);
             }
@@ -41,8 +39,6 @@ public class PassengerController{
             } catch (NumberFormatException ex) {
                 return new Response("Passenger ID must be numeric.", Status.BAD_REQUEST);
             }
-
-            // Verify ID uniqueness
             PassengerStorage storage = PassengerStorage.getInstance();
             if (storage.passengerIdExists(id)) {
                 return new Response("A passenger with the provided ID already exists.", Status.BAD_REQUEST);
@@ -72,8 +68,6 @@ public class PassengerController{
             } catch (DateTimeParseException ex) {
                 return new Response("Date of birth is not valid. Use YYYY-MM-DD format.", Status.BAD_REQUEST);
             }
-
-            // 3. Phone code validation
             if (phoneCodeStr == null || phoneCodeStr.trim().isEmpty()) {
                 return new Response("Phone code must not be empty.", Status.BAD_REQUEST);
             }
@@ -88,8 +82,6 @@ public class PassengerController{
             } catch (NumberFormatException ex) {
                 return new Response("Phone code must be numeric.", Status.BAD_REQUEST);
             }
-
-            // 4. Phone number validation
             if (phoneNumberStr == null || phoneNumberStr.trim().isEmpty()) {
                 return new Response("Phone number must not be empty.", Status.BAD_REQUEST);
             }
@@ -104,8 +96,6 @@ public class PassengerController{
             } catch (NumberFormatException ex) {
                 return new Response("Phone number must be numeric.", Status.BAD_REQUEST);
             }
-
-            // 5. Validation of other fields (not empty)
             if (firstName == null || firstName.trim().isEmpty()) {
                 return new Response("First name must not be empty.", Status.BAD_REQUEST);
             }
@@ -115,14 +105,9 @@ public class PassengerController{
             if (country == null || country.trim().isEmpty()) {
                 return new Response("Country must not be empty.", Status.BAD_REQUEST);
             }
-            // You could add more specific email format validation here if needed.
-
-
-            // If all validations pass, create and save the passenger
             Passenger newPassenger = new Passenger(id, firstName.trim(), lastName.trim(), dateOfBirth, phoneCode, phoneNumber, country.trim());
             
             if (!storage.addPassenger(newPassenger)) {
-                // This case was already covered by passengerIdExists, but it's a double-check.
                 return new Response("Error saving passenger, ID might be duplicated.", Status.BAD_REQUEST);
             }
 
@@ -142,7 +127,108 @@ public class PassengerController{
     }
 
     public static Response getAllPassengers() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("Not supported yet."); }
+    public static Response updatePassenger(String idStrToUpdate, String newFirstName, String newLastName,
+                                       String newYearStr, String newMonthStr, String newDayStr,
+                                       String newPhoneCodeStr, String newPhoneNumberStr, String newCountry) {
+    try {
+        long idToUpdate;
+        LocalDate newDateOfBirth;
+        int newPhoneCode;
+        long newPhoneNumber;
+
+        if (idStrToUpdate == null || idStrToUpdate.trim().isEmpty()) {
+            return new Response("Passenger ID for update must not be empty.", Status.BAD_REQUEST);
+        }
+        try {
+            idToUpdate = Long.parseLong(idStrToUpdate);
+        } catch (NumberFormatException ex) {
+            return new Response("Passenger ID for update must be numeric.", Status.BAD_REQUEST);
+        }
+        PassengerStorage storage = PassengerStorage.getInstance();
+        Passenger passengerToUpdate = storage.getPassengerById(idToUpdate);
+
+        if (passengerToUpdate == null) {
+            return new Response("Passenger with ID " + idToUpdate + " not found.", Status.NOT_FOUND);
+        }
+        
+        if (newFirstName == null || newFirstName.trim().isEmpty()) {
+            return new Response("First name must not be empty.", Status.BAD_REQUEST);
+        }
+       
+        if (newLastName == null || newLastName.trim().isEmpty()) {
+            return new Response("Last name must not be empty.", Status.BAD_REQUEST);
+        }
+
+        if (newYearStr == null || newYearStr.trim().isEmpty() ||
+            newMonthStr == null || newMonthStr.trim().isEmpty() ||
+            newDayStr == null || newDayStr.trim().isEmpty()) {
+            return new Response("Date of birth fields (year, month, day) must not be empty.", Status.BAD_REQUEST);
+        }
+        try {
+            String localMonthStr = newMonthStr;
+            String localDayStr = newDayStr;
+            if (localMonthStr.length() == 1) {
+                localMonthStr = "0" + localMonthStr;
+            }
+            if (localDayStr.length() == 1) {
+                localDayStr = "0" + localDayStr;
+            }
+            DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            newDateOfBirth = LocalDate.parse(newYearStr + "/" + localMonthStr + "/" + localDayStr, DATE_FORMATTER);
+        } catch (DateTimeParseException ex) {
+            return new Response("New date of birth is not valid. Use yyyy/MM/dd format.", Status.BAD_REQUEST);
+        }
+
+        if (newPhoneCodeStr == null || newPhoneCodeStr.trim().isEmpty()) {
+            return new Response("Phone code must not be empty.", Status.BAD_REQUEST);
+        }
+        if (newPhoneCodeStr.length() > 3) {
+            return new Response("Phone code must have at most 3 digits.", Status.BAD_REQUEST);
+        }
+        try {
+            newPhoneCode = Integer.parseInt(newPhoneCodeStr);
+            if (newPhoneCode < 0) {
+                return new Response("Phone code must be greater than or equal to 0.", Status.BAD_REQUEST);
+            }
+        } catch (NumberFormatException ex) {
+            return new Response("Phone code must be numeric.", Status.BAD_REQUEST);
+        }
+
+        if (newPhoneNumberStr == null || newPhoneNumberStr.trim().isEmpty()) {
+            return new Response("Phone number must not be empty.", Status.BAD_REQUEST);
+        }
+        if (newPhoneNumberStr.length() > 11) { // Ajusta la longitud máxima según tus necesidades
+            return new Response("Phone number must have at most 11 digits.", Status.BAD_REQUEST);
+        }
+        try {
+            newPhoneNumber = Long.parseLong(newPhoneNumberStr);
+            if (newPhoneNumber < 0) {
+                return new Response("Phone number must be greater than or equal to 0.", Status.BAD_REQUEST);
+            }
+        } catch (NumberFormatException ex) {
+            return new Response("Phone number must be numeric.", Status.BAD_REQUEST);
+        }
+
+        if (newCountry == null || newCountry.trim().isEmpty()) {
+            return new Response("Country must not be empty.", Status.BAD_REQUEST);
+        }
+        passengerToUpdate.setFirstName(newFirstName.trim());
+        passengerToUpdate.setLastName(newLastName.trim());
+        passengerToUpdate.setDateOfBirth(newDateOfBirth); 
+        passengerToUpdate.setPhoneCode(newPhoneCode);     
+        passengerToUpdate.setPhoneNumber(newPhoneNumber); 
+        passengerToUpdate.setCountry(newCountry.trim());  
+        
+        if (storage.updatePassenger(passengerToUpdate)) {
+            return new Response("Passenger updated successfully.", Status.SUCCESS, passengerToUpdate);
+        } else {
+            return new Response("Error updating passenger in storage.", Status.INTERNAL_SERVER_ERROR);
+        }
+
+    } catch (Exception ex) {
+        return new Response("Unexpected server error during update: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
     }
+}
 }
 

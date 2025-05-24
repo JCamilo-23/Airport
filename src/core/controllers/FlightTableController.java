@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 public class FlightTableController {
     private JTable flightTable;
@@ -31,20 +31,12 @@ public class FlightTableController {
         }
         DefaultTableModel model = (DefaultTableModel) this.flightTable.getModel();
         model.setRowCount(0);
-
-        // Asunción: FlightStorage tiene un método getFlights()
-        // Si los vuelos se gestionan solo en la lista this.flights de AirportFrame,
-        // entonces este controlador necesitaría recibir esa lista en su constructor.
-        // Por consistencia con otros Storage, es mejor que FlightStorage lo provea.
         ArrayList<Flight> allFlights;
-        if (FlightStorage.getInstance() != null && FlightStorage.getInstance().getFlights() != null ) { // Ejemplo de cómo podría ser
+        if (FlightStorage.getInstance() != null && FlightStorage.getInstance().getFlights() != null ) { 
              allFlights = FlightStorage.getInstance().getFlights();
         } else {
-            // Fallback o error si FlightStorage no está implementado como se espera
             System.err.println("FlightStorage o getFlights() no disponible. La tabla de vuelos no se puede refrescar desde el storage.");
-            // Si usas this.flights de AirportFrame, necesitarías pasar esa lista al constructor
-            // y usarla aquí. Por ahora, lo dejo con la estructura de Storage.
-            allFlights = new ArrayList<>(); // Lista vacía para evitar NullPointerException más adelante
+            allFlights = new ArrayList<>(); 
         }
 
 
@@ -75,7 +67,7 @@ public class FlightTableController {
 
                     String planeIdStr = (flight.getPlane() != null && flight.getPlane().getId() != null) ?
                                         flight.getPlane().getId() : "N/A";
-                    int numPassengers = flight.getNumPassengers(); // Asume que existe en Flight
+                    int numPassengers = flight.getNumPassengers();
 
                     model.addRow(new Object[]{
                         flightId, depAirportId, arrAirportId, scaleAirportId,

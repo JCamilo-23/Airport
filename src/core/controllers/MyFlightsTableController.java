@@ -15,11 +15,11 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 public class MyFlightsTableController {
     private JTable myFlightsTable;
-    private JComboBox<String> userSelectComboBox; // Necesita saber qué usuario está seleccionado
+    private JComboBox<String> userSelectComboBox; 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public MyFlightsTableController(JTable myFlightsTable, JComboBox<String> userSelectComboBox) {
@@ -37,12 +37,12 @@ public class MyFlightsTableController {
         model.setRowCount(0);
 
         String selectedUserStr = null;
-        if (userSelectComboBox.getSelectedIndex() > 0) { // Asumiendo que el índice 0 es "Select User"
+        if (userSelectComboBox.getSelectedIndex() > 0) { 
             selectedUserStr = (String) userSelectComboBox.getSelectedItem();
         }
 
         if (selectedUserStr == null || selectedUserStr.equals("Select User") || selectedUserStr.trim().isEmpty()) {
-            return; // No hay usuario seleccionado o es la opción por defecto
+            return; 
         }
 
         try {
@@ -71,14 +71,10 @@ public class MyFlightsTableController {
                     }
                 }
             } else if (passenger == null) {
-                // Evitar JOptionPane aquí si el refresco es automático, podría ser molesto.
-                // System.out.println("Pasajero (ID: " + passengerId + ") no encontrado para 'Mis Vuelos'.");
-                
             }
         } catch (NumberFormatException e) {
              System.err.println("Error al convertir ID de pasajero para 'Mis Vuelos': " + e.getMessage());
         } catch (Exception e) {
-            // Evitar JOptionPane aquí también. Registrar el error es mejor.
             System.err.println("Ocurrió un error al refrescar 'Mis Vuelos': " + e.getMessage());
             e.printStackTrace();
         }

@@ -71,9 +71,8 @@ public class LoadStorage {
                 String airline = obj.getString("airline");
 
                 Plane plane = new Plane(id, brand, model, maxCapacity, airline);
-                // Asegúrate de que PlaneStorage exista y tenga el método addPlane
                 if (planeSto
-                        != null) { // Solo para evitar NullPointerException si aún no lo has creado
+                        != null) { 
                     planeSto
                             .addPlane(plane);
                 } else {
