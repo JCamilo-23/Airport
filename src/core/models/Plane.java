@@ -5,13 +5,14 @@
 package core.models;
 
 import core.models.flight.Flight;
+import core.models.utils.Add;
 import java.util.ArrayList;
 
 /**
  *
  * @author edangulo
  */
-public class Plane implements Prototype<Plane>{
+public class Plane implements Prototype<Plane>, Add{
     
     private final String id;
     private String brand;
@@ -27,10 +28,6 @@ public class Plane implements Prototype<Plane>{
         this.maxCapacity = maxCapacity;
         this.airline = airline;
         this.flights = new ArrayList<>();
-    }
-
-    public void addFlight(Flight flight) {
-        this.flights.add(flight);
     }
     
     public String getId() {
@@ -66,6 +63,11 @@ public class Plane implements Prototype<Plane>{
         Plane clone = new Plane(id, brand, model, maxCapacity, airline);
         clone.getFlights().addAll(flights);
         return clone;
+    }
+
+    @Override
+    public void addFlight(Flight flight) {
+        this.flights.add(flight);
     }
     
 }

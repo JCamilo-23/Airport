@@ -5,8 +5,8 @@
 package core.models.storage;
 
 import core.models.Plane;
-import core.patterns.Observer;
-import core.patterns.Subject;
+import core.models.utils.Observer;
+import core.models.utils.Subject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

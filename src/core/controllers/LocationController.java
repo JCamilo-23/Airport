@@ -143,7 +143,7 @@ public class LocationController {
             try {
                 Location locationCopy = (Location) newLocation.clone();
                 return new Response("Airport created successfully.", Status.CREATED, locationCopy);
-            } catch (CloneNotSupportedException e) {
+            } catch (Exception e) {
                 System.err.println("Cloning not supported for Location: " + e.getMessage());
                 return new Response("Airport created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
             }
@@ -173,7 +173,7 @@ public class LocationController {
             for (Location loc : locations) {
                 try {
                     locationCopies.add((Location) loc.clone()); // Asume que Location implementa clone()
-                } catch (CloneNotSupportedException e) {
+                } catch (Exception e) {
                     System.err.println("Error cloning location with ID " + loc.getAirportId() + ": " + e.getMessage());
                     // Omitir o manejar error
                 }
@@ -216,8 +216,11 @@ public class LocationController {
         }
     }
 
-    public static void storageDownload(JComboBox<String> flightDepartureLocationComboBox) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public static void storageDownload(JComboBox jbox){
+        LocationStorage storage = LocationStorage.getInstance();
+        for (Location loc : storage.getLocations()) {
+            jbox.addItem(""+loc.getAirportId());
+        }
     }
 }
 

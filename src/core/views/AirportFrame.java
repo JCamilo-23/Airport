@@ -15,13 +15,15 @@ import core.controllers.tables.PassengerTableController;
 import core.controllers.tables.PlaneTableController;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.models.flight.ArrivalDate;
 import core.models.flight.Flight;
 import core.models.storage.FlightStorage;
 import core.models.storage.LocationStorage;
 import core.models.storage.PassengerStorage;
 import core.models.storage.PlaneStorage;
-import core.patterns.Observer;
+import core.models.utils.Observer;
 import java.awt.Color;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
@@ -53,6 +55,7 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
         // Las siguientes llamadas parecen ser para poblar ComboBoxes, lo cual está bien.
         // Considera si estos también deberían actualizarse con el patrón Observer
         // o si una carga inicial es suficiente.
+        System.out.println("Entro");
         PassengerController.storageDownload(userSelect);
         FlightController.storageDownload(addToFlightSelectionComboBox);
         FlightController.storageDownload(delayFlightIdComboBox);
@@ -76,50 +79,20 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
         this.blockPanels();
 
         // --- 3. REGISTRAR AirportFrame COMO OBSERVADOR ---
-        PassengerStorage.getInstance().registerObserver(this);
-        PlaneStorage.getInstance().registerObserver(this);
-        LocationStorage.getInstance().registerObserver(this);
-        FlightStorage.getInstance().registerObserver(this);
-
-        // --- CARGA INICIAL DE DATOS EN TABLAS ---
-        // Es bueno cargar los datos una vez que la UI está lista y se ha registrado como observador.
-        refreshAllPassengersTableData();
-        refreshAllPlanesTableData();
-        refreshAllLocationsTableData();
-        refreshAllFlightsTableData();
-        // refreshMyFlightsTableData(); // Implementa esto si es necesario
     }
   @Override
     public void update() {
         System.out.println("AirportFrame (Observer): Notificación recibida. Actualizando tablas...");
-        // Llamamos a todos los métodos de refresco.
-        // En una implementación más avanzada, podrías tener formas de saber qué cambió
-        // para solo refrescar la tabla necesaria, pero esto es un buen comienzo.
-        refreshAllPassengersTableData();
-        refreshAllPlanesTableData();
-        refreshAllLocationsTableData();
-        refreshAllFlightsTableData();
-        // refreshMyFlightsTableData(); // Si también necesitas que esta tabla se actualice automáticamente
+
+
     }
       // --- Métodos privados para bloquear paneles y generar ComboBoxes (tu código existente) ---
     private void blockPanels() {
-        // Tu lógica actual para habilitar/deshabilitar pestañas según el tipo de usuario
-        // Administrador: todas excepto Update Info (idx 5), Add to Flight (idx 6), Show my Flights (idx 7)
-        // Usuario: Show all Flights (idx 9->8), Show all Locations (idx 11->10), Update Info (idx 5), Add to Flight (idx 6), Show my Flights (idx 7)
-        // Los índices pueden cambiar si se añaden o quitan pestañas. Revisa los índices en jTabbedPane1.
-        // Por ahora, dejo tu lógica original, pero asegúrate de que los índices sean correctos.
-        // La lógica actual de administratorActionPerformed y userActionPerformed parece manejar esto.
-        // Lo importante es que al inicio se bloqueen correctamente.
         for (int i = 1; i < jTabbedPane1.getTabCount(); i++) {
-            // Pestañas que podrían estar inicialmente deshabilitadas o depender del tipo de usuario
-            // La lógica de habilitación/deshabilitación ya está en administratorActionPerformed y userActionPerformed
-            // Podrías querer un estado inicial aquí o llamar a uno de esos métodos.
-            // Por ahora, la mantendré como la tenías, asumiendo que funciona con los radio buttons.
              if (i != 9 && i != 11) { // Show all flights (idx 8), Show all locations (idx 10)
                  jTabbedPane1.setEnabledAt(i, false);
              }
         }
-         // Si quieres un estado por defecto (ej. ninguna opción de admin/user seleccionada al inicio)
         if (!administrator.isSelected() && !user.isSelected()) {
             for (int i = 1; i < jTabbedPane1.getTabCount(); i++) {
                 jTabbedPane1.setEnabledAt(i, false);
@@ -141,14 +114,15 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
                 // "Departure Date", "Arrival Date", "Plane ID", "Number Passengers"
                 int numPassengers = 0; // TODO: Necesitas una forma de obtener esto del modelo Flight
                                        // ej. flight.getPassengers().size()
-
+                ArrivalDate calculate = new ArrivalDate(flight);
+                LocalDateTime arrivalDate = calculate.calculateArrivalDate();
                 allFlightsTableModel.addRow(new Object[]{
                     flight.getId(),
                     flight.getDepartureLocation() != null ? flight.getDepartureLocation().getAirportId() : "N/A",
                     flight.getArrivalLocation() != null ? flight.getArrivalLocation().getAirportId() : "N/A",
                     flight.getScaleLocation() != null ? flight.getScaleLocation().getAirportId() : "N/A",
                     flight.getDepartureDate() != null ? flight.getDepartureDate().format(dateTimeFormatter) : "N/A",
-                    flight.getArrivalDate() != null ? flight.getArrivalDate().format(dateTimeFormatter) : "N/A", // Asume que existe getArrivalDate
+                    arrivalDate != null ? arrivalDate.format(dateTimeFormatter) : "N/A", // Asume que existe getArrivalDate
                     flight.getPlane() != null ? flight.getPlane().getId() : "N/A",
                     numPassengers
                 });
@@ -184,10 +158,12 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
             for (Flight flight : flightsList) {
                  // Columnas definidas en tu initComponents para myFlightsTable:
                  // "ID", "Departure Date", "Arrival Date"
-                myFlightsTableModel.addRow(new Object[]{
+                 ArrivalDate calculate = new ArrivalDate(flight);
+                 LocalDateTime arrivalDate = calculate.calculateArrivalDate();
+                 myFlightsTableModel.addRow(new Object[]{
                     flight.getId(),
                     flight.getDepartureDate() != null ? flight.getDepartureDate().format(dateTimeFormatter) : "N/A",
-                    flight.getArrivalDate() != null ? flight.getArrivalDate().format(dateTimeFormatter) : "N/A" // Asume que existe getArrivalDate
+                    arrivalDate != null ? arrivalDate.format(dateTimeFormatter) : "N/A" // Asume que existe getArrivalDate
                 });
             }
         } else if (response.getStatus() != Status.SUCCESS && response.getData() == null && response.getMessage().contains("No flights found for passenger")) {
@@ -1999,19 +1975,4 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
     private javax.swing.JRadioButton user;
     private javax.swing.JComboBox<String> userSelect;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-
-    private void refreshAllPassengersTableData() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    private void refreshAllLocationsTableData() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    private void refreshAllPlanesTableData() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
 }

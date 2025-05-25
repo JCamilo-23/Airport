@@ -131,12 +131,5 @@ public class Flight implements Prototype<Flight>, Cloneable{
         clone.passengers = new ArrayList<>(passengers);
         return clone;
     }
-    
-    public Object getArrivalDate() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
-    public Object getPassengers() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }

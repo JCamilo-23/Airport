@@ -11,8 +11,8 @@ package core.models.storage;
 
 import core.models.flight.Flight;
 import core.models.storage.interfaces.IFlightStorage;
-import core.patterns.Observer;
-import core.patterns.Subject;
+import core.models.utils.Observer;
+import core.models.utils.Subject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;

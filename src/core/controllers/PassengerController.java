@@ -12,8 +12,6 @@ import core.models.storage.FlightStorage;
 import core.models.storage.PassengerStorage;
 import core.models.storage.interfaces.IFlightStorage;
 import core.models.storage.interfaces.IPassengerStorage;
-import core.patterns.Observer;
-import core.patterns.Subject;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -24,7 +22,7 @@ import javax.swing.JComboBox;
  *
  * @author Admin
  */
-public class PassengerController implements Subject{
+public class PassengerController{
     // DIP: Usar interfaces para las dependencias de 
     private static IPassengerStorage passengerStorage = (IPassengerStorage) PassengerStorage.getInstance();
     private static IFlightStorage flightStorage = (IFlightStorage) FlightStorage.getInstance();
@@ -138,9 +136,6 @@ public class PassengerController implements Subject{
             Passenger passengerCopy = (Passenger) newPassenger.clone(); // Patrón Prototype
             return new Response("Passenger created successfully.", Status.CREATED, passengerCopy);
 
-        } catch (CloneNotSupportedException e) {
-            System.err.println("Cloning failed for new passenger: " + e.getMessage());
-            return new Response("Passenger created but could not be cloned for response.", Status.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {
             System.err.println("Unexpected error in registerPassenger: " + ex.getMessage());
             return new Response("Unexpected server error: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
@@ -194,9 +189,6 @@ public class PassengerController implements Subject{
             Passenger passengerCopy = (Passenger) passengerToUpdate.clone(); // Patrón Prototype
             return new Response("Passenger updated successfully.", Status.SUCCESS, passengerCopy);
 
-        } catch (Exception e) {
-            System.err.println("Cloning failed for updated passenger: " + e.getMessage());
-            return new Response("Passenger updated but could not be cloned for response.", Status.INTERNAL_SERVER_ERROR);
         } catch (Exception ex) {    
             System.err.println("Unexpected error in updatePassenger: " + ex.getMessage());
             return new Response("Unexpected server error during update: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
@@ -259,18 +251,18 @@ public class PassengerController implements Subject{
                 return new Response("Passenger with ID '" + passengerId + "' not found.", Status.NOT_FOUND);
             }
 
-            if (flight.getPassengers() != null && flight.getPassengers().size() >= flight.getPlane().getMaxCapacity()) {
+            if (flight.getNumPassengers() >= flight.getPlane().getMaxCapacity()) {
                 return new Response("Flight " + flightId + " is full. Cannot add passenger " + passengerId + ".", Status.BAD_REQUEST);
             }
-            
-            if (flight.getPassengers() != null && flight.getPassengers().stream().anyMatch(p -> p.getId() == passenger.getId())) {
+            FlightStorage storage = FlightStorage.getInstance();
+            if (storage.flightIdExists(flightId)) {
                  return new Response("Passenger " + passengerId + " is already assigned to flight " + flightId + ".", Status.BAD_REQUEST);
             }
 
-            boolean addedToFlight = flight.addPassenger(passenger);
-            boolean flightAddedToPassenger = passenger.addFlight(flight);
+            flight.addPassenger(passenger);
+            passenger.addFlight(flight);
 
-            if (addedToFlight && flightAddedToPassenger) {
+            
                 // Para que Observer funcione: los cambios en flight y passenger deben guardarse
                 // y los métodos de guardado en Storage deben llamar a notifyObservers().
                 boolean flightUpdatedOk = flightStorage.updateFlight(flight); 
@@ -281,9 +273,6 @@ public class PassengerController implements Subject{
                     // Podrías considerar esto un error parcial o completo dependiendo de la criticidad.
                 }
                 return new Response("Passenger " + passengerId + " assigned to flight " + flightId + " successfully.", Status.SUCCESS);
-            } else {
-                return new Response("Failed to assign passenger to flight. Model constraints might have prevented it.", Status.BAD_REQUEST);
-            }
         } catch (Exception ex) {
             System.err.println("Unexpected error in asignFlight: " + ex.getMessage());
             return new Response("An unexpected server error occurred during flight assignment: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
@@ -364,23 +353,11 @@ public class PassengerController implements Subject{
         }
     }
 
-    public static void storageDownload(JComboBox<String> userSelect) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void registerObserver(Observer observer) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void removeObserver(Observer observer) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public void notifyObservers() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public static void storageDownload(JComboBox jbox){
+        PassengerStorage storage = PassengerStorage.getInstance();
+        for (Passenger s : storage.getPassengers()) {
+            jbox.addItem(""+s.getId());
+        }
     }
 }
 
