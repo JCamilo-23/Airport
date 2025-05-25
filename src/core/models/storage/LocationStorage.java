@@ -5,15 +5,18 @@
 package core.models.storage;
 
 import core.models.Location;
+import core.models.storage.interfaces.ILocationStorage;
 import core.patterns.Observer;
 import core.patterns.Subject;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
  * @author brayan
  */
-    public class LocationStorage implements Subject { // 1. Implementar Subject
+    public class LocationStorage implements Subject, ILocationStorage   { // 1. Implementar Subject
     // Instancia Singleton
     private static LocationStorage instance;
     private ArrayList<Location> locations;
@@ -45,7 +48,15 @@ import java.util.ArrayList;
             observers.remove(observer);
         }
     }
-
+    
+    @Override // Añade si getLocations() está en ILocationStorage
+    public ArrayList<Location> getLocations() {
+    ArrayList<Location> sortedLocations = new ArrayList<>(this.locations);
+    if (sortedLocations.size() > 1) { // Solo ordenar si hay más de un elemento
+        Collections.sort(sortedLocations, Comparator.comparing(Location::getAirportId));
+    }
+    return sortedLocations;
+}
     @Override
     public void notifyObservers() {
         ArrayList<Observer> observersCopy = new ArrayList<>(this.observers);
@@ -111,10 +122,6 @@ import java.util.ArrayList;
         return false;
     }
 
-    public ArrayList<Location> getLocations() {
-        // Devolver una copia para proteger la lista interna
-        return new ArrayList<>(this.locations);
-    }
 
     // Si necesitas un método para actualizar localizaciones, se vería así:
     // public boolean updateLocation(Location locationToUpdate) {

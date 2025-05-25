@@ -29,6 +29,10 @@
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/tables/FlightTableController.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/tables/PassengerTableController.java</file>
             <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/controllers/tables/PlaneTableController.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/interfaces/IPassengerStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/interfaces/IFlightStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/interfaces/IPlaneStorage.java</file>
+            <file>file:/C:/Users/braya/OneDrive/Documents/GitHub/Airport/Airport/src/core/models/storage/interfaces/ILocationStorage.java</file>
         </group>
     </open-files>
 </project-private>

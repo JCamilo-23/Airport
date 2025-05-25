@@ -8,13 +8,15 @@ import core.models.Plane;
 import core.patterns.Observer;
 import core.patterns.Subject;
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.Comparator;
+import core.models.storage.interfaces.IPlaneStorage;
 /**
  *
  * @author brayan
  */
 
-    public class PlaneStorage implements Subject { 
+    public class PlaneStorage implements Subject, IPlaneStorage {
     private static PlaneStorage instance;
     private ArrayList<Plane> planes;
     private final ArrayList<Observer> observers; // 2. Añadir lista de observadores (usando ArrayList)
@@ -45,7 +47,13 @@ import java.util.ArrayList;
             observers.remove(observer);
         }
     }
-
+    public ArrayList<Plane> getPlanes() {
+    ArrayList<Plane> planesCopy = new ArrayList<>(this.planes); // Crea una copia
+    // Ordena la copia por ID antes de devolverla
+    // Asumiendo que Plane.getId() devuelve un String comparable
+    Collections.sort(planesCopy, Comparator.comparing(Plane::getId));
+    return planesCopy;
+}
     @Override
     public void notifyObservers() {
         ArrayList<Observer> observersCopy = new ArrayList<>(this.observers); // Copia para iteración segura
@@ -111,10 +119,6 @@ import java.util.ArrayList;
         return false;
     }
 
-    public ArrayList<Plane> getPlanes() {
-        // Devolver una copia para proteger la lista interna y consistencia
-        return new ArrayList<>(this.planes);
-    }
 
     // Ejemplo de cómo se vería un método de actualización (si lo necesitas)
     // public boolean updatePlane(Plane planeToUpdate) {

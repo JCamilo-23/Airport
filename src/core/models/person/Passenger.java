@@ -114,10 +114,10 @@ public class Passenger implements Prototype<Passenger>{
 
     @Override
     public Passenger clone() {
-        Passenger clone = new Passenger(id, firstname, lastname, birthDate, countryPhoneCode, phone, country);
-        clone.getFlights().addAll(flights);
-        return clone;
-    }
+    Passenger clone = new Passenger(id, firstname, lastname, birthDate, countryPhoneCode, phone, country);
+    clone.getFlights().addAll(flights); // o clone.flights = new ArrayList<>(this.flights);
+    return clone;
+}
 
 
     public Object getLastName() {
@@ -147,5 +147,6 @@ public class Passenger implements Prototype<Passenger>{
     public void setPhoneNumber(long newPhoneNumber) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
     
 }

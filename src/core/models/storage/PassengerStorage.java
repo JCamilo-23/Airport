@@ -5,16 +5,19 @@
 package core.models.storage;
 
 import core.models.person.Passenger;
+import core.models.storage.interfaces.IPassengerStorage;
 import core.patterns.Observer;
 import core.patterns.Subject;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
  * @author brayan
  */
 
-    public class PassengerStorage implements Subject {
+    public class PassengerStorage implements Subject, IPassengerStorage {
 
     private static PassengerStorage instance;
     private ArrayList<Passenger> passengers;
@@ -34,6 +37,13 @@ import java.util.ArrayList;
     }
 
     // Implementación de métodos de Subject
+     @Override
+    public ArrayList<Passenger> getPassengers() {
+        ArrayList<Passenger> sortedPassengers = new ArrayList<>(this.passengers);
+        Collections.sort(sortedPassengers, Comparator.comparingLong(Passenger::getId));
+        return sortedPassengers; // Devuelve la copia ordenada
+    }
+    
     @Override
     public void registerObserver(Observer observer) {
         if (observer != null && !observers.contains(observer)) {
@@ -121,9 +131,5 @@ import java.util.ArrayList;
             }
         }
         return false;
-    }
-
-    public ArrayList<Passenger> getPassengers() {
-        return new ArrayList<>(this.passengers);
     }
 }

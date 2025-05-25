@@ -2001,9 +2001,6 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void update() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
     private void refreshAllPassengersTableData() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody

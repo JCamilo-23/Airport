@@ -8,6 +8,8 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Location;
 import core.models.storage.LocationStorage;
+import core.models.storage.interfaces.ILocationStorage;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 import javax.swing.JComboBox;
 
@@ -16,97 +18,206 @@ import javax.swing.JComboBox;
  * @author Admin
  */
 public class LocationController {
-    public static Response createLocation(String airportId, String airportName, String airportCity, String airportCountry, String latitudeStr, String longitudeStr){
-         try {
-            if (airportId == null || airportId.trim().isEmpty()) {
-                return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
-            }
-            
-            airportId = airportId.trim().toUpperCase(); 
-            if (!Pattern.compile("[A-Z]{3}").matcher(airportId).matches()) {
-                return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
-            }
-            
-           LocationStorage storage = LocationStorage.getInstance();
-            if (storage.LocationIdExists(airportId)) {
-                return new Response("An airport with ID '" + airportId + "' already exists.", Status.BAD_REQUEST);
-            }
+    
+    // DIP: Depender de la abstracción (interfaz)
+    private static ILocationStorage locationStorage = (ILocationStorage) LocationStorage.getInstance();
 
-            if (airportName == null || airportName.trim().isEmpty()) {
-                return new Response("Airport name must not be empty.", Status.BAD_REQUEST);
-            }
+    // Expresión regular para el ID del aeropuerto (3 letras mayúsculas)
+    private static final Pattern AIRPORT_ID_PATTERN = Pattern.compile("[A-Z]{3}");
 
-            if (airportCity == null || airportCity.trim().isEmpty()) {
-                return new Response("Airport city must not be empty.", Status.BAD_REQUEST);
-            }
-
-            if (airportCountry == null || airportCountry.trim().isEmpty()) {
-                return new Response("Airport country must not be empty.", Status.BAD_REQUEST);
-            }
-
-            if (latitudeStr == null || latitudeStr.trim().isEmpty()) {
-                return new Response("Latitude must not be empty.", Status.BAD_REQUEST);
-            }
-            double latitude;
-            try {
-                String trimmedLatitudeStr = latitudeStr.trim();
-                if (!hasAtMostFourDecimalPlaces(trimmedLatitudeStr)) {
-                     return new Response("Latitude must have at most 4 decimal places and be a valid number format.", Status.BAD_REQUEST);
-                }
-                latitude = Double.parseDouble(trimmedLatitudeStr);
-                if (latitude < -90.0 || latitude > 90.0) {
-                    return new Response("Latitude must be between -90.0 and 90.0.", Status.BAD_REQUEST);
-                }
-            } catch (NumberFormatException ex) {
-                return new Response("Latitude must be a valid number.", Status.BAD_REQUEST);
-            }
-
-            if (longitudeStr == null || longitudeStr.trim().isEmpty()) {
-                return new Response("Longitude must not be empty.", Status.BAD_REQUEST);
-            }
-            double longitude;
-            try {
-                String trimmedLongitudeStr = longitudeStr.trim();
-                 if (!hasAtMostFourDecimalPlaces(trimmedLongitudeStr)) {
-                    return new Response("Longitude must have at most 4 decimal places and be a valid number format.", Status.BAD_REQUEST);
-                }
-                longitude = Double.parseDouble(trimmedLongitudeStr);
-                if (longitude < -180.0 || longitude > 180.0) {
-                    return new Response("Longitude must be between -180.0 and 180.0.", Status.BAD_REQUEST);
-                }
-            } catch (NumberFormatException ex) {
-                return new Response("Longitude must be a valid number.", Status.BAD_REQUEST);
-            }
-
-            Location newLocation = new Location(airportId, airportName.trim(), airportCity.trim(), 
-                                             airportCountry.trim(), latitude, longitude);
-            
-            if (!storage.addLocation(newLocation)) {
-
-                return new Response("this Airplane already exists", Status.BAD_REQUEST);
-            }
-
-            return new Response("Airport created successfully.", Status.CREATED, newLocation);
-
-        } catch (Exception ex) {
-            return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-     private static boolean hasAtMostFourDecimalPlaces(String valueStr) {
+    // Helper para validar decimales (ya lo tenías, está bien aquí como privado)
+    private static boolean hasAtMostFourDecimalPlaces(String valueStr) {
         if (valueStr.contains(".")) {
+            // Rechazar si contiene 'e' o 'E' (notación científica no deseada para este formato)
             if (valueStr.toLowerCase().contains("e")) {
                 return false;
             }
             String decimalPart = valueStr.substring(valueStr.indexOf(".") + 1);
-            return decimalPart.length() <= 4 && decimalPart.matches("[0-9]+"); 
+            // Asegurar que la parte decimal solo contenga números y tenga la longitud correcta
+            return decimalPart.length() <= 4 && decimalPart.matches("\\d+");
         }
-        return true; 
+        return true; // No hay parte decimal, es válido
     }
-     public static void storageDownload(JComboBox jbox){
-        LocationStorage storage = LocationStorage.getInstance();
-        for (Location loc : storage.getLocations()) {
-            jbox.addItem(""+loc.getAirportId());
+
+    // --- SRP: Método privado para validación de datos de la localización ---
+    private static Response validateLocationData(String airportId, String airportName, String airportCity,
+                                                 String airportCountry, String latitudeStr, String longitudeStr) {
+        // Airport ID (Formato y unicidad se validan en createLocation antes de llamar aquí si es creación)
+        // Aquí validamos el formato general si no se ha hecho antes o para una actualización.
+        if (airportId == null || airportId.trim().isEmpty()) {
+            return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
         }
+        String trimmedAirportId = airportId.trim().toUpperCase();
+        if (!AIRPORT_ID_PATTERN.matcher(trimmedAirportId).matches()) {
+            return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
+        }
+
+        // Resto de campos no vacíos
+        if (airportName == null || airportName.trim().isEmpty()) {
+            return new Response("Airport name must not be empty.", Status.BAD_REQUEST);
+        }
+        if (airportCity == null || airportCity.trim().isEmpty()) {
+            return new Response("Airport city must not be empty.", Status.BAD_REQUEST);
+        }
+        if (airportCountry == null || airportCountry.trim().isEmpty()) {
+            return new Response("Airport country must not be empty.", Status.BAD_REQUEST);
+        }
+
+        // Latitud
+        if (latitudeStr == null || latitudeStr.trim().isEmpty()) {
+            return new Response("Latitude must not be empty.", Status.BAD_REQUEST);
+        }
+        double latitude;
+        try {
+            String trimmedLatitudeStr = latitudeStr.trim();
+            if (!hasAtMostFourDecimalPlaces(trimmedLatitudeStr)) {
+                return new Response("Latitude must have at most 4 decimal places.", Status.BAD_REQUEST);
+            }
+            latitude = Double.parseDouble(trimmedLatitudeStr);
+            if (latitude < -90.0 || latitude > 90.0) {
+                return new Response("Latitude must be between -90.0 and 90.0.", Status.BAD_REQUEST);
+            }
+        } catch (NumberFormatException ex) {
+            return new Response("Latitude must be a valid number.", Status.BAD_REQUEST);
+        }
+
+        // Longitud
+        if (longitudeStr == null || longitudeStr.trim().isEmpty()) {
+            return new Response("Longitude must not be empty.", Status.BAD_REQUEST);
+        }
+        double longitude;
+        try {
+            String trimmedLongitudeStr = longitudeStr.trim();
+            if (!hasAtMostFourDecimalPlaces(trimmedLongitudeStr)) {
+                return new Response("Longitude must have at most 4 decimal places.", Status.BAD_REQUEST);
+            }
+            longitude = Double.parseDouble(trimmedLongitudeStr);
+            if (longitude < -180.0 || longitude > 180.0) {
+                return new Response("Longitude must be between -180.0 and 180.0.", Status.BAD_REQUEST);
+            }
+        } catch (NumberFormatException ex) {
+            return new Response("Longitude must be a valid number.", Status.BAD_REQUEST);
+        }
+        return null; // Validación exitosa
+    }
+
+    public static Response createLocation(String airportIdStr, String airportName, String airportCity, String airportCountry, String latitudeStr, String longitudeStr) {
+        try {
+            // Validación de formato de ID y unicidad primero
+            if (airportIdStr == null || airportIdStr.trim().isEmpty()) {
+                return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
+            }
+            String airportId = airportIdStr.trim().toUpperCase();
+            if (!AIRPORT_ID_PATTERN.matcher(airportId).matches()) {
+                return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
+            }
+            if (locationStorage.LocationIdExists(airportId)) { // Usa el método de la interfaz
+                return new Response("An airport with ID '" + airportId + "' already exists.", Status.BAD_REQUEST);
+            }
+
+            // Validar el resto de los datos
+            Response validationResponse = validateLocationData(airportId, airportName, airportCity, airportCountry, latitudeStr, longitudeStr);
+            if (validationResponse != null) {
+                // Re-chequea el mensaje de ID ya que validateLocationData también lo valida
+                // pero la unicidad es más prioritaria si falla el formato.
+                if (validationResponse.getMessage().contains("Airport ID") && !AIRPORT_ID_PATTERN.matcher(airportId).matches()) {
+                     return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
+                }
+                return validationResponse;
+            }
+
+            // Parseo final (ya que la validación de formato numérico se hizo en validateLocationData)
+            double latitude = Double.parseDouble(latitudeStr.trim());
+            double longitude = Double.parseDouble(longitudeStr.trim());
+
+            Location newLocation = new Location(airportId, airportName.trim(), airportCity.trim(),
+                                                airportCountry.trim(), latitude, longitude);
+
+            if (!locationStorage.addLocation(newLocation)) {
+                // Este caso es menos probable si la validación de ID único ya pasó.
+                return new Response("Failed to add location, ID might already exist or another storage error occurred.", Status.INTERNAL_SERVER_ERROR);
+            }
+
+            // Patrón Prototype: Devolver una copia del objeto creado
+            // Asegúrate de que tu clase Location implemente Cloneable y tenga un método clone()
+            try {
+                Location locationCopy = (Location) newLocation.clone();
+                return new Response("Airport created successfully.", Status.CREATED, locationCopy);
+            } catch (CloneNotSupportedException e) {
+                System.err.println("Cloning not supported for Location: " + e.getMessage());
+                return new Response("Airport created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
+            }
+
+        } catch (Exception ex) {
+            System.err.println("Unexpected error in createLocation: " + ex.getMessage());
+            // ex.printStackTrace(); // Para depuración
+            return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    // SRP: Método para obtener todas las localizaciones para la vista.
+    public static Response getAllLocations() {
+        try {
+            // ILocationStorage.getLocations() debe devolver la lista ordenada por Airport ID
+            ArrayList<Location> locations = locationStorage.getLocations();
+
+            if (locations == null) { // El storage no debería devolver null
+                 locations = new ArrayList<>();
+            }
+             if (locations.isEmpty()){
+                 return new Response("No locations found.", Status.NOT_FOUND, new ArrayList<Location>());
+            }
+
+            // Patrón Prototype: Devolver una lista de copias
+            ArrayList<Location> locationCopies = new ArrayList<>();
+            for (Location loc : locations) {
+                try {
+                    locationCopies.add((Location) loc.clone()); // Asume que Location implementa clone()
+                } catch (CloneNotSupportedException e) {
+                    System.err.println("Error cloning location with ID " + loc.getAirportId() + ": " + e.getMessage());
+                    // Omitir o manejar error
+                }
+            }
+            return new Response("Locations retrieved successfully.", Status.SUCCESS, locationCopies);
+        } catch (Exception ex) {
+            System.err.println("Unexpected error in getAllLocations: " + ex.getMessage());
+            // ex.printStackTrace();
+            return new Response("An unexpected server error occurred while retrieving locations.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * SRP: Devuelve la información necesaria para que la Vista pueble ComboBoxes de localizaciones.
+     * @return Response con ArrayList de String[] {airportId, "airportId - airportName (airportCity)"}.
+     */
+    public static Response getLocationDisplayInfoForComboBox() {
+        try {
+            // ILocationStorage.getLocations() debe devolver la lista ordenada por Airport ID
+            ArrayList<Location> locations = locationStorage.getLocations();
+            ArrayList<String[]> locationDisplayInfo = new ArrayList<>();
+            
+            if (locations == null) { locations = new ArrayList<>(); }
+
+            for (Location loc : locations) {
+                locationDisplayInfo.add(new String[]{
+                        loc.getAirportId(), // Valor
+                        loc.getAirportId() + " - " + loc.getAirportName() // Texto a mostrar
+                });
+            }
+
+            if (locationDisplayInfo.isEmpty() && locations.isEmpty()) {
+                 return new Response("No locations found for ComboBox.", Status.NOT_FOUND, new ArrayList<String[]>());
+            }
+            return new Response("Location info for ComboBox retrieved.", Status.SUCCESS, locationDisplayInfo);
+        } catch (Exception ex) {
+            System.err.println("Unexpected error in getLocationDisplayInfoForComboBox: " + ex.getMessage());
+            // ex.printStackTrace();
+            return new Response("Error retrieving location info for ComboBox.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public static void storageDownload(JComboBox<String> flightDepartureLocationComboBox) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
 

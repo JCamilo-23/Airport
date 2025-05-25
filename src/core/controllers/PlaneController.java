@@ -8,7 +8,7 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Plane;
 import core.models.storage.PlaneStorage;
-import java.util.ArrayList;
+import core.patterns.Observer;
 import javax.swing.JComboBox;
 
 /**
@@ -73,5 +73,17 @@ public class PlaneController {
         for (Plane p : storage.getPlanes()) {
             jbox.addItem(""+p.getId());
         }
+    }
+
+    public void registerObserver(Observer observer) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public void removeObserver(Observer observer) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public void notifyObservers() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

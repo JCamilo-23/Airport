@@ -9,5 +9,9 @@ package core.patterns;
  * @author brayan
  */
 public interface Observer {
+       /**
+     * Método llamado por el Sujeto cuando su estado cambia.
+     * El observador debe implementar la lógica para reaccionar a esta actualización.
+     */
     void update();
 }

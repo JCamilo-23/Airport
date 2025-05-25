@@ -15,7 +15,7 @@ import java.util.ArrayList;
  *
  * @author edangulo
  */
-public class Flight implements Prototype<Flight>{
+public class Flight implements Prototype<Flight>, Cloneable{
     
     private final String id;
     private ArrayList<Passenger> passengers;
@@ -130,5 +130,13 @@ public class Flight implements Prototype<Flight>{
         
         clone.passengers = new ArrayList<>(passengers);
         return clone;
+    }
+    
+    public Object getArrivalDate() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public Object getPassengers() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

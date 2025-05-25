@@ -35,4 +35,8 @@ public class Response {
     public Object getObject() {
         return object;
     }
+
+    public Object getData() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 }
