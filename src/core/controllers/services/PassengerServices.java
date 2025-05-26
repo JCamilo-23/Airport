@@ -21,7 +21,7 @@ Response updatePassenger(String idStrToUpdate, String newFirstName, String newLa
                                            String newPhoneCodeStr, String newPhoneNumberStr, String newCountry);
 Response getAllPassengers();
 
-Response asignFlight(String passengerIdStr, String flightIdFromComboBox);
+Response assignFlight(String passengerIdStr, String flightIdFromComboBox);
 
 Response getFlightsForPassenger(String passengerIdStr);
 

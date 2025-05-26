@@ -1676,7 +1676,7 @@ public class AirportFrame extends javax.swing.JFrame implements Observer {
         String passengerId = addToFlightPassengerIdTextField.getText();
         String flightId = addToFlightSelectionComboBox.getItemAt(addToFlightSelectionComboBox.getSelectedIndex());
         PassengerController passengerController = new PassengerController();
-        Response response = passengerController.asignFlight(passengerId, flightId);
+        Response response = passengerController.assignFlight(passengerId, flightId);
         
          if (response.getStatus() >= 500) {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);

@@ -1,12 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package core.controllers;
 
+import core.controllers.services.PassengerServices;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
-import core.controllers.services.PassengerServices;
+import core.controllers.validations.PassengerValidator;
 import core.models.calculate.PassengerFormats;
 import core.models.flight.Flight;
 import core.models.person.Passenger;
@@ -14,198 +11,133 @@ import core.models.storage.FlightStorage;
 import core.models.storage.PassengerStorage;
 import core.models.storage.interfaces.IFlightStorage;
 import core.models.storage.interfaces.IPassengerStorage;
+
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
-/**
- *
- * @author Admin
- */
-public class PassengerController implements PassengerServices{
-    // DIP: Usar interfaces para las dependencias de 
-    private static IPassengerStorage passengerStorage = (IPassengerStorage) PassengerStorage.getInstance();
-    private static IFlightStorage flightStorage = (IFlightStorage) FlightStorage.getInstance();
+public class PassengerController implements PassengerServices {
 
-    private static Response validatePassengerBaseData(String firstName, String lastName,
-                                                      String yearStr, String monthStr, String dayStr,
-                                                      String phoneCodeStr, String phoneNumberStr, String country) {
-        if (firstName == null || firstName.trim().isEmpty()) {
-            return new Response("First name must not be empty.", Status.BAD_REQUEST);
-        }
-        if (lastName == null || lastName.trim().isEmpty()) {
-            return new Response("Last name must not be empty.", Status.BAD_REQUEST);
-        }
+    private final IPassengerStorage passengerStorage = (IPassengerStorage) PassengerStorage.getInstance();
+    private final IFlightStorage flightStorage = (IFlightStorage) FlightStorage.getInstance();
+    private final PassengerValidator passengerValidator;
 
-        if (yearStr == null || yearStr.trim().isEmpty() || monthStr == null || monthStr.trim().isEmpty() || dayStr == null || dayStr.trim().isEmpty()) {
-            return new Response("All date of birth fields (year, month, day) must not be empty.", Status.BAD_REQUEST);
-        }
-        try {
-            String localMonthStr = monthStr.trim();
-            String localDayStr = dayStr.trim();
-            if (localMonthStr.length() == 1) localMonthStr = "0" + localMonthStr;
-            if (localDayStr.length() == 1) localDayStr = "0" + localDayStr;
-            DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate.parse(yearStr.trim() + "/" + localMonthStr + "/" + localDayStr, DATE_FORMATTER);
-        } catch (DateTimeParseException ex) {
-            return new Response("Date of birth is not valid. Use yyyy/MM/dd format and ensure it's a real date.", Status.BAD_REQUEST);
-        } catch (NumberFormatException ex) {
-            return new Response("Year, month, and day for birthdate must be valid numbers.", Status.BAD_REQUEST);
-        }
-
-        if (phoneCodeStr == null || phoneCodeStr.trim().isEmpty()) {
-            return new Response("Phone code must not be empty.", Status.BAD_REQUEST);
-        }
-        if (phoneCodeStr.trim().length() > 3) {
-            return new Response("Phone code must have at most 3 digits.", Status.BAD_REQUEST);
-        }
-        try {
-            int phoneCodeVal = Integer.parseInt(phoneCodeStr.trim());
-            if (phoneCodeVal < 0) {
-                return new Response("Phone code must be greater than or equal to 0.", Status.BAD_REQUEST);
-            }
-        } catch (NumberFormatException ex) {
-            return new Response("Phone code must be numeric.", Status.BAD_REQUEST);
-        }
-
-        if (phoneNumberStr == null || phoneNumberStr.trim().isEmpty()) {
-            return new Response("Phone number must not be empty.", Status.BAD_REQUEST);
-        }
-        if (phoneNumberStr.trim().length() > 11) {
-            return new Response("Phone number must have at most 11 digits.", Status.BAD_REQUEST);
-        }
-        try {
-            long phoneNumVal = Long.parseLong(phoneNumberStr.trim());
-            if (phoneNumVal < 0) {
-                return new Response("Phone number must be greater than or equal to 0.", Status.BAD_REQUEST);
-            }
-        } catch (NumberFormatException ex) {
-            return new Response("Phone number must be numeric.", Status.BAD_REQUEST);
-        }
-
-        if (country == null || country.trim().isEmpty()) {
-            return new Response("Country must not be empty.", Status.BAD_REQUEST);
-        }
-        return null; 
+    public PassengerController() {
+        this.passengerValidator = new PassengerValidator();
     }
+
     @Override
-    public  Response registerPassenger(String idStr, String firstName, String lastName, String yearStr, String monthStr, String dayStr, String phoneCodeStr, String phoneNumberStr, String country) {
+    public Response registerPassenger(String idStr, String firstName, String lastName,
+                                      String yearStr, String monthStr, String dayStr,
+                                      String phoneCodeStr, String phoneNumberStr, String country) {
         try {
-            if (idStr == null || idStr.trim().isEmpty()) {
-                return new Response("Passenger ID must not be empty.", Status.BAD_REQUEST);
+            // Validate and parse ID
+            Response idValidationResponse = passengerValidator.validateAndParsePassengerId(idStr);
+            if (idValidationResponse.getStatus() != Status.SUCCESS) {
+                return idValidationResponse;
             }
-            if (idStr.trim().length() > 15) {
-                return new Response("Passenger ID must have at most 15 digits.", Status.BAD_REQUEST);
-            }
-            long id;
-            try {
-                id = Long.parseLong(idStr.trim());
-                if (id < 0) {
-                    return new Response("Passenger ID must be greater than or equal to 0.", Status.BAD_REQUEST);
-                }
-            } catch (NumberFormatException ex) {
-                return new Response("Passenger ID must be numeric.", Status.BAD_REQUEST);
+            long id = (long) idValidationResponse.getObject();
+
+            // Check if passenger ID already exists
+            Response idExistsResponse = passengerValidator.checkPassengerIdExists(id, passengerStorage);
+            if (idExistsResponse != null) { // If not null, it's an error response
+                return idExistsResponse;
             }
 
-            if (passengerStorage.passengerIdExists(id)) {
-                return new Response("A passenger with the provided ID " + id + " already exists.", Status.BAD_REQUEST);
-            }
-
-            Response baseValidationResponse = validatePassengerBaseData(firstName, lastName, yearStr, monthStr, dayStr, phoneCodeStr, phoneNumberStr, country);
-            if (baseValidationResponse != null) {
+            // Validate base passenger 
+            Response baseValidationResponse = passengerValidator.validatePassengerBase(
+                firstName, lastName, yearStr, monthStr, dayStr, phoneCodeStr, phoneNumberStr, country);
+            if (baseValidationResponse.getStatus() != Status.SUCCESS) {
                 return baseValidationResponse;
             }
+            
+            // Retrieve parsed date and phone from validator responses (if they were put in  field)
+            Response dateParseResponse = passengerValidator.validateAndParseDateOfBirth(yearStr, monthStr, dayStr);
+            LocalDate dateOfBirth = (LocalDate) dateParseResponse.getObject(); // Assumes  is LocalDate
 
-            String localMonthStr = monthStr.trim();
-            if (localMonthStr.length() == 1) localMonthStr = "0" + localMonthStr;
-            String localDayStr = dayStr.trim();
-            if (localDayStr.length() == 1) localDayStr = "0" + localDayStr;
-            DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate dateOfBirth = LocalDate.parse(yearStr.trim() + "/" + localMonthStr + "/" + localDayStr, DATE_FORMATTER);
-            int phoneCode = Integer.parseInt(phoneCodeStr.trim());
-            long phoneNumber = Long.parseLong(phoneNumberStr.trim());
+            Response phoneParseResponse = passengerValidator.validateAndParsePhoneNumber(phoneCodeStr, phoneNumberStr);
+            Object[] phoneParts = (Object[]) phoneParseResponse.getObject(); // Assumes  is Object[]{int, long}
+            int phoneCode = (int) phoneParts[0];
+            long phoneNumber = (long) phoneParts[1];
+
 
             Passenger newPassenger = new Passenger(id, firstName.trim(), lastName.trim(), dateOfBirth, phoneCode, phoneNumber, country.trim());
 
             if (!passengerStorage.addPassenger(newPassenger)) {
                 return new Response("Error saving passenger, ID might be duplicated or another issue occurred.", Status.INTERNAL_SERVER_ERROR);
             }
-            try {
-                Passenger passengerCopy = (Passenger) newPassenger.clone(); // Patrón Prototype
-                return new Response("Passenger created successfully.", Status.CREATED, passengerCopy);
-
-            } catch (Exception e) {
-                System.err.println("Cloning not supported for Passenger: " + e.getMessage());
-                return new Response("Passenger created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
-            }
             
-        } catch (Exception ex) {
-            System.err.println("Unexpected error in registerPassenger: " + ex.getMessage());
-            return new Response("Unexpected server error: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
+            // Clone for response (Prototype Pattern)
+            Passenger passengerCopy = (Passenger) newPassenger.clone(); 
+            return new Response("Passenger created successfully.", Status.CREATED, passengerCopy);
+
+        }catch (Exception e) {
+            System.err.println("Cloning not supported for Passenger: " + e.getMessage());
+            return new Response("Passenger created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
         }
+        
     }
+
     @Override
     public Response updatePassenger(String idStrToUpdate, String newFirstName, String newLastName,
-                                           String newYearStr, String newMonthStr, String newDayStr,
-                                           String newPhoneCodeStr, String newPhoneNumberStr, String newCountry) {
+                                    String newYearStr, String newMonthStr, String newDayStr,
+                                    String newPhoneCodeStr, String newPhoneNumberStr, String newCountry) {
         try {
-            if (idStrToUpdate == null || idStrToUpdate.trim().isEmpty()) {
-                return new Response("Passenger ID for update must not be empty.", Status.BAD_REQUEST);
+            // Validate and parse ID for update
+            Response idValidationResponse = passengerValidator.validateAndParsePassengerId(idStrToUpdate);
+            if (idValidationResponse.getStatus() != Status.SUCCESS) {
+                return idValidationResponse;
             }
-            long idToUpdate;
-            try {
-                idToUpdate = Long.parseLong(idStrToUpdate.trim());
-            } catch (NumberFormatException ex) {
-                return new Response("Passenger ID for update must be numeric.", Status.BAD_REQUEST);
-            }
+            long idToUpdate = (long) idValidationResponse.getObject();
 
             Passenger passengerToUpdate = passengerStorage.getPassengerById(idToUpdate);
             if (passengerToUpdate == null) {
                 return new Response("Passenger with ID " + idToUpdate + " not found.", Status.NOT_FOUND);
             }
 
-            Response baseValidationResponse = validatePassengerBaseData(newFirstName, newLastName, newYearStr, newMonthStr, newDayStr, newPhoneCodeStr, newPhoneNumberStr, newCountry);
-            if (baseValidationResponse != null) {
+            // Validate new base passenger 
+            Response baseValidationResponse = passengerValidator.validatePassengerBase(
+                newFirstName, newLastName, newYearStr, newMonthStr, newDayStr, 
+                newPhoneCodeStr, newPhoneNumberStr, newCountry);
+            if (baseValidationResponse.getStatus() != Status.SUCCESS) {
                 return baseValidationResponse;
             }
 
-            String localMonthStr = newMonthStr.trim();
-            if (localMonthStr.length() == 1) localMonthStr = "0" + localMonthStr;
-            String localDayStr = newDayStr.trim();
-            if (localDayStr.length() == 1) localDayStr = "0" + localDayStr;
-            DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate newDateOfBirth = LocalDate.parse(newYearStr.trim() + "/" + localMonthStr + "/" + localDayStr, DATE_FORMATTER);
-            int newPhoneCode = Integer.parseInt(newPhoneCodeStr.trim());
-            long newPhoneNumber = Long.parseLong(newPhoneNumberStr.trim());
+            // Retrieve parsed date and phone
+            Response dateParseResponse = passengerValidator.validateAndParseDateOfBirth(newYearStr, newMonthStr, newDayStr);
+            LocalDate newDateOfBirth = (LocalDate) dateParseResponse.getObject();
 
+            Response phoneParseResponse = passengerValidator.validateAndParsePhoneNumber(newPhoneCodeStr, newPhoneNumberStr);
+            Object[] phoneParts = (Object[]) phoneParseResponse.getObject();
+            int newPhoneCode = (int) phoneParts[0];
+            long newPhoneNumber = (long) phoneParts[1];
+            
             passengerToUpdate.setFirstname(newFirstName.trim());
             passengerToUpdate.setLastname(newLastName.trim());
             passengerToUpdate.setBirthDate(newDateOfBirth);
-            passengerToUpdate.setCountryPhoneCode(newPhoneCode); // Asumiendo nombres de setters correctos en Passenger.java
-            passengerToUpdate.setPhone(newPhoneNumber);         // Asumiendo nombres de setters correctos
+            passengerToUpdate.setCountryPhoneCode(newPhoneCode);
+            passengerToUpdate.setPhone(newPhoneNumber);
             passengerToUpdate.setCountry(newCountry.trim());
 
             if (!passengerStorage.updatePassenger(passengerToUpdate)) {
                 return new Response("Error updating passenger in storage.", Status.INTERNAL_SERVER_ERROR);
             }
 
-            Passenger passengerCopy = (Passenger) passengerToUpdate.clone(); // Patrón Prototype
+            Passenger passengerCopy = (Passenger) passengerToUpdate.clone();
             return new Response("Passenger updated successfully.", Status.SUCCESS, passengerCopy);
 
-        } catch (Exception ex) {    
-            System.err.println("Unexpected error in updatePassenger: " + ex.getMessage());
-            return new Response("Unexpected server error during update: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            System.err.println("Cloning not supported for Passenger during update: " + e.getMessage());
+            return new Response("Passenger updated, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
         }
     }
+
     @Override
     public Response getAllPassengers() {
         try {
-            // IPassengerStorage.getPassengers() debe devolver la lista ordenada por ID
-            ArrayList<Passenger> passengers = passengerStorage.getPassengers();
+            ArrayList<Passenger> passengers = passengerStorage.getPassengers(); // Assuming sorted by ID as per original comment
 
-            if (passengers == null) { // Storage no debería devolver null
-                passengers = new ArrayList<>(); // Tratar como lista vacía para evitar NullPointerException
+            if (passengers == null) { // Storage should ideally not return null
+                passengers = new ArrayList<>(); 
             }
             
             if (passengers.isEmpty()) {
@@ -215,35 +147,35 @@ public class PassengerController implements PassengerServices{
             ArrayList<Passenger> passengerCopies = new ArrayList<>();
             for (Passenger p : passengers) {
                 try {
-                    passengerCopies.add((Passenger) p.clone()); // Patrón Prototype
+                    passengerCopies.add((Passenger) p.clone());
                 } catch (Exception e) {
-                    System.err.println("Error cloning passenger with ID " + p.getId() + ": " + e.getMessage());
-                    // Considerar cómo manejar esto: omitir, o devolver error si la clonación es crítica.
+                    System.err.println("Error cloning passenger with ID " + p.getId() + " in getAllPassengers: " + e.getMessage());
+                    // Decide handling: skip, add original (risky), or return error.
+                    // For now, skipping the problematic one.
                 }
             }
             return new Response("Passengers retrieved successfully.", Status.SUCCESS, passengerCopies);
         } catch (Exception ex) {
             System.err.println("Unexpected error in getAllPassengers: " + ex.getMessage());
+            ex.printStackTrace();
             return new Response("An unexpected server error occurred while retrieving passengers.", Status.INTERNAL_SERVER_ERROR);
         }
     }
-    @Override
-    public Response asignFlight(String passengerIdStr, String flightIdFromComboBox) {
-        try {
-            if (passengerIdStr == null || passengerIdStr.trim().isEmpty()) {
-                return new Response("Passenger ID must not be empty.", Status.BAD_REQUEST);
-            }
-            long passengerId;
-            try {
-                passengerId = Long.parseLong(passengerIdStr.trim());
-            } catch (NumberFormatException e) {
-                return new Response("Passenger ID must be numeric.", Status.BAD_REQUEST);
-            }
 
-            if (flightIdFromComboBox == null || flightIdFromComboBox.trim().isEmpty() || flightIdFromComboBox.equalsIgnoreCase("Flight") || flightIdFromComboBox.equalsIgnoreCase("ID")) {
-                return new Response("A valid Flight ID must be selected.", Status.BAD_REQUEST);
+    @Override
+    public Response assignFlight(String passengerIdStr, String flightIdFromComboBox) {
+        try {
+            Response passengerIdResponse = passengerValidator.validateAndParsePassengerId(passengerIdStr);
+            if(passengerIdResponse.getStatus() != Status.SUCCESS){
+                return passengerIdResponse;
             }
-            String flightId = flightIdFromComboBox.trim().toUpperCase();
+            long passengerId = (long) passengerIdResponse.getObject();
+
+            if (flightIdFromComboBox == null || flightIdFromComboBox.trim().isEmpty() || 
+                flightIdFromComboBox.equalsIgnoreCase("Flight") || flightIdFromComboBox.equalsIgnoreCase("ID")) { // Example placeholder check
+                return new Response("A valid Flight ID must be selected/provided.", Status.BAD_REQUEST);
+            }
+            String flightId = flightIdFromComboBox.trim().toUpperCase(); // Assuming flight IDs are uppercase
 
             Flight flight = flightStorage.getFlight(flightId);
             if (flight == null) {
@@ -258,70 +190,75 @@ public class PassengerController implements PassengerServices{
             if (flight.getNumPassengers() >= flight.getPlane().getMaxCapacity()) {
                 return new Response("Flight " + flightId + " is full. Cannot add passenger " + passengerId + ".", Status.BAD_REQUEST);
             }
-            for(Flight f: passenger.getFlights()){
-                if(f.getId().equals(flightId)){
-                    return new Response("Passenger " + passengerId + " is already assigned to flight " + flightId + ".", Status.BAD_REQUEST);     
+            
+            // Check if passenger already assigned to this flight
+            for(Flight f: passenger.getFlights()){ // Assumes passenger.getFlights() returns a list of flights passenger is on
+                if(f.getId().equals(flightId)){ // Assumes Flight has getId()
+                    return new Response("Passenger " + passengerId + " is already assigned to flight " + flightId + ".", Status.BAD_REQUEST);    
                 }
             }
 
-            flight.addPassenger(passenger);
+            flight.addPassenger(passenger); // Assumes these methods manage the bidirectional relationship
             passenger.addFlight(flight);
 
+            // Persist changes
+            boolean flightUpdatedOk = flightStorage.updateFlight(flight); 
+            boolean passengerUpdatedOk = passengerStorage.updatePassenger(passenger);
 
-                boolean flightUpdatedOk = flightStorage.updateFlight(flight); 
-                boolean passengerUpdatedOk = passengerStorage.updatePassenger(passenger);
-
-                if (!flightUpdatedOk || !passengerUpdatedOk) {
-                    System.err.println("Warning: Passenger/Flight assignment updated in memory, but failed to persist all changes to storage for observer notification.");
-                }
-                return new Response("Passenger " + passengerId + " assigned to flight " + flightId + " successfully.", Status.SUCCESS);
+            if (!flightUpdatedOk || !passengerUpdatedOk) {
+                // This is a tricky situation.  might be inconsistent.
+                // Consider transactional behavior or rollback if possible, or at least log severity.
+                System.err.println("Warning: Passenger/Flight assignment updated in memory, but failed to persist all changes to storage.  might be inconsistent.");
+                // Depending on requirements, this could be a full error.
+                return new Response("Flight assignment partially failed during storage update.", Status.INTERNAL_SERVER_ERROR);
+            }
+            
+            return new Response("Passenger " + passengerId + " assigned to flight " + flightId + " successfully.", Status.SUCCESS);
         } catch (Exception ex) {
-            System.err.println("Unexpected error in asignFlight: " + ex.getMessage());
+            System.err.println("Unexpected error in assignFlight: " + ex.getMessage());
+            ex.printStackTrace();
             return new Response("An unexpected server error occurred during flight assignment: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
+    
     @Override
     public Response getFlightsForPassenger(String passengerIdStr) {
         try {
-            if (passengerIdStr == null || passengerIdStr.trim().isEmpty()) {
-                return new Response("Passenger ID must not be empty for fetching flights.", Status.BAD_REQUEST);
+            Response passengerIdResponse = passengerValidator.validateAndParsePassengerId(passengerIdStr);
+            if(passengerIdResponse.getStatus() != Status.SUCCESS){
+                return passengerIdResponse;
             }
-            long passengerId;
-            try {
-                passengerId = Long.parseLong(passengerIdStr.trim());
-            } catch (NumberFormatException e) {
-                return new Response("Passenger ID must be numeric.", Status.BAD_REQUEST);
-            }
+            long passengerId = (long) passengerIdResponse.getObject();
 
             Passenger passenger = passengerStorage.getPassengerById(passengerId);
             if (passenger == null) {
                 return new Response("Passenger with ID " + passengerId + " not found.", Status.NOT_FOUND);
             }
 
-            ArrayList<Flight> flights = passenger.getFlights(); 
+            ArrayList<Flight> flights = passenger.getFlights(); // Original comment: "debería devolver una COPIA y ORDENADA por fecha"
 
-            if (flights == null) { 
-                flights = new ArrayList<>();
-            }
+            if (flights == null) { flights = new ArrayList<>(); }
 
             if (flights.isEmpty()) {
                 return new Response("No flights found for passenger " + passengerId + ".", Status.NOT_FOUND, new ArrayList<Flight>());
             }
             
-            
             ArrayList<Flight> flightCopies = new ArrayList<>();
             for (Flight f : flights) {
                 try {
-                    flightCopies.add((Flight) f.clone());
+                    flightCopies.add((Flight) f.clone()); // Assumes Flight is Cloneable
                 } catch (Exception e) {
-                    System.err.println("Error cloning flight with ID " + f.getId() + ": " + e.getMessage());
+                     System.err.println("Error cloning flight with ID " + f.getId() + " in getFlightsForPassenger: " + e.getMessage());
                 }
             }
-          
+            // Sorting by departure date: if passenger.getFlights() doesn't already do it.
+            // Example: flightCopies.sort(Comparator.comparing(Flight::getDepartureDate)); // Assumes Flight has getDepartureDate()
+
             return new Response("Flights for passenger " + passengerId + " retrieved successfully.", Status.SUCCESS, flightCopies);
 
         } catch (Exception ex) {
             System.err.println("Unexpected error in getFlightsForPassenger: " + ex.getMessage());
+            ex.printStackTrace();
             return new Response("An unexpected error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
@@ -329,24 +266,24 @@ public class PassengerController implements PassengerServices{
     @Override
     public Response getPassengerDisplayInfoForComboBox() {
         try {
-            ArrayList<Passenger> passengers = passengerStorage.getPassengers();
+            ArrayList<Passenger> passengers = passengerStorage.getPassengers(); // Assumes sorted by ID
             ArrayList<String[]> displayInfo = new ArrayList<>();
 
             if (passengers == null) { passengers = new ArrayList<>(); }
-            
+
             for (Passenger p : passengers) {
                 PassengerFormats format = new PassengerFormats(p);
-                displayInfo.add(new String[]{String.valueOf(p.getId()), format.getFullname()});
+                displayInfo.add(new String[]{String.valueOf(p.getId()), format.getFullname()}); // Assumes Passenger has getId() and getFullname()
             }
             
-            if (displayInfo.isEmpty() && passengers.isEmpty()) {
-                return new Response("No passengers found for ComboBox.", Status.NOT_FOUND, new ArrayList<String[]>());
+            if (displayInfo.isEmpty() && passengers.isEmpty()) { // Check if truly no passengers
+                 return new Response("No passengers found for ComboBox.", Status.NOT_FOUND, new ArrayList<String[]>());
             }
             return new Response("Passenger info for ComboBox retrieved.", Status.SUCCESS, displayInfo);
         } catch (Exception ex) {
             System.err.println("Unexpected error in getPassengerDisplayInfoForComboBox: " + ex.getMessage());
+            ex.printStackTrace();
             return new Response("Error retrieving passenger info for ComboBox: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
 }
-

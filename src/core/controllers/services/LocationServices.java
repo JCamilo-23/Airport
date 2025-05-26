@@ -11,7 +11,6 @@ import core.controllers.utils.Response;
  * @author Andrea Osio Amaya
  */
 public interface LocationServices {
-    boolean hasAtMostFourDecimalPlaces(String valueStr);
     
    Response createLocation(String airportIdStr, String airportName, String airportCity, 
                                                 String airportCountry, String latitudeStr, 
