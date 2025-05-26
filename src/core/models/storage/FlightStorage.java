@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class FlightStorage implements Subject, IFlightStorage { // Implementaciones correctas
+public class FlightStorage implements Subject, IFlightStorage { 
     private static FlightStorage instance;
     private ArrayList<Flight> flights;
     private final ArrayList<Observer> observers;
@@ -34,7 +34,6 @@ public class FlightStorage implements Subject, IFlightStorage { // Implementacio
         return instance;
     }
 
-    // Métodos de Subject (register, remove, notify) - Se ven bien
     @Override
     public void registerObserver(Observer observer) {
         if (observer != null && !observers.contains(observer)) {
@@ -115,14 +114,10 @@ public class FlightStorage implements Subject, IFlightStorage { // Implementacio
     @Override
     public ArrayList<Flight> getFlights() {
         ArrayList<Flight> sortedFlights = new ArrayList<>(this.flights);
-        // Requisito del parcial: Los vuelos se deben obtener de manera ordenada
-        // (respecto a su fecha de salida, de los más antiguos a los más nuevos).
-        // Asegúrate que tu clase Flight tenga un método getDepartureDate()
-        // que devuelva un tipo comparable (como LocalDateTime).
-        if (sortedFlights.size() > 1) { // Solo ordenar si hay más de un elemento
+        if (sortedFlights.size() > 1) {
              Collections.sort(sortedFlights, Comparator.comparing(Flight::getDepartureDate));
         }
-        return sortedFlights; // Devuelve la copia ordenada
+        return sortedFlights; 
     }
 
     @Override
@@ -138,6 +133,6 @@ public class FlightStorage implements Subject, IFlightStorage { // Implementacio
                 return true;
             }
         }
-        return false; // No se encontró para actualizar
+        return false;
     }
 }

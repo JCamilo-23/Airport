@@ -87,12 +87,11 @@ public class PassengerController implements PassengerServices{
         if (country == null || country.trim().isEmpty()) {
             return new Response("Country must not be empty.", Status.BAD_REQUEST);
         }
-        return null; // Validación base exitosa
+        return null; 
     }
     @Override
     public  Response registerPassenger(String idStr, String firstName, String lastName, String yearStr, String monthStr, String dayStr, String phoneCodeStr, String phoneNumberStr, String country) {
         try {
-            // Validación específica del ID para el registro
             if (idStr == null || idStr.trim().isEmpty()) {
                 return new Response("Passenger ID must not be empty.", Status.BAD_REQUEST);
             }
@@ -268,15 +267,12 @@ public class PassengerController implements PassengerServices{
             flight.addPassenger(passenger);
             passenger.addFlight(flight);
 
-            
-                // Para que Observer funcione: los cambios en flight y passenger deben guardarse
-                // y los métodos de guardado en Storage deben llamar a notifyObservers().
+
                 boolean flightUpdatedOk = flightStorage.updateFlight(flight); 
                 boolean passengerUpdatedOk = passengerStorage.updatePassenger(passenger);
 
                 if (!flightUpdatedOk || !passengerUpdatedOk) {
                     System.err.println("Warning: Passenger/Flight assignment updated in memory, but failed to persist all changes to storage for observer notification.");
-                    // Podrías considerar esto un error parcial o completo dependiendo de la criticidad.
                 }
                 return new Response("Passenger " + passengerId + " assigned to flight " + flightId + " successfully.", Status.SUCCESS);
         } catch (Exception ex) {
@@ -302,9 +298,9 @@ public class PassengerController implements PassengerServices{
                 return new Response("Passenger with ID " + passengerId + " not found.", Status.NOT_FOUND);
             }
 
-            ArrayList<Flight> flights = passenger.getFlights(); // Passenger.getFlights() debería devolver una COPIA y ORDENADA por fecha
+            ArrayList<Flight> flights = passenger.getFlights(); 
 
-            if (flights == null) { // El getter del modelo no debería devolver null
+            if (flights == null) { 
                 flights = new ArrayList<>();
             }
 
@@ -312,8 +308,7 @@ public class PassengerController implements PassengerServices{
                 return new Response("No flights found for passenger " + passengerId + ".", Status.NOT_FOUND, new ArrayList<Flight>());
             }
             
-            // Patrón Prototype: Devolver una lista de copias de Flight
-            // Esto asume que Flight también es Cloneable y tiene un método clone()
+            
             ArrayList<Flight> flightCopies = new ArrayList<>();
             for (Flight f : flights) {
                 try {
@@ -322,12 +317,7 @@ public class PassengerController implements PassengerServices{
                     System.err.println("Error cloning flight with ID " + f.getId() + ": " + e.getMessage());
                 }
             }
-            // El parcial pide que los vuelos de un pasajero estén ordenados por fecha de salida.
-            // Esta ordenación debería hacerse en passenger.getFlights() o aquí si es necesario.
-            // Si passenger.getFlights() ya los devuelve ordenados, no necesitas reordenar aquí.
-            // Ejemplo de ordenamiento si no estuvieran ya ordenados:
-            // Collections.sort(flightCopies, Comparator.comparing(Flight::getDepartureDate));
-
+          
             return new Response("Flights for passenger " + passengerId + " retrieved successfully.", Status.SUCCESS, flightCopies);
 
         } catch (Exception ex) {
@@ -339,7 +329,6 @@ public class PassengerController implements PassengerServices{
     @Override
     public Response getPassengerDisplayInfoForComboBox() {
         try {
-            // IPassengerStorage.getPassengers() debe devolver la lista ordenada por ID
             ArrayList<Passenger> passengers = passengerStorage.getPassengers();
             ArrayList<String[]> displayInfo = new ArrayList<>();
 

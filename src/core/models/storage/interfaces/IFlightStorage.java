@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author braya
+ * @author brayan
  */
 public interface IFlightStorage {
     boolean addFlight(Flight flight);
