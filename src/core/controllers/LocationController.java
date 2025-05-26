@@ -18,33 +18,27 @@ import java.util.regex.Pattern;
  * @author Admin
  */
 public class LocationController implements LocationServices{
-    
-    // DIP: Depender de la abstracción (interfaz)
+
     private static ILocationStorage locationStorage = (ILocationStorage) LocationStorage.getInstance();
 
-    // Expresión regular para el ID del aeropuerto (3 letras mayúsculas)
+    
     private static final Pattern AIRPORT_ID_PATTERN = Pattern.compile("[A-Z]{3}");
 
-    // Helper para validar decimales (ya lo tenías, está bien aquí como privado)
+   
     @Override
     public boolean hasAtMostFourDecimalPlaces(String valueStr) {
         if (valueStr.contains(".")) {
-            // Rechazar si contiene 'e' o 'E' (notación científica no deseada para este formato)
             if (valueStr.toLowerCase().contains("e")) {
                 return false;
             }
             String decimalPart = valueStr.substring(valueStr.indexOf(".") + 1);
-            // Asegurar que la parte decimal solo contenga números y tenga la longitud correcta
             return decimalPart.length() <= 4 && decimalPart.matches("\\d+");
         }
-        return true; // No hay parte decimal, es válido
+        return true;
     }
 
-    // --- SRP: Método privado para validación de datos de la localización ---
     private Response validateLocationData(String airportId, String airportName, String airportCity,
                                                  String airportCountry, String latitudeStr, String longitudeStr) {
-        // Airport ID (Formato y unicidad se validan en createLocation antes de llamar aquí si es creación)
-        // Aquí validamos el formato general si no se ha hecho antes o para una actualización.
         if (airportId == null || airportId.trim().isEmpty()) {
             return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
         }
@@ -53,7 +47,6 @@ public class LocationController implements LocationServices{
             return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
         }
 
-        // Resto de campos no vacíos
         if (airportName == null || airportName.trim().isEmpty()) {
             return new Response("Airport name must not be empty.", Status.BAD_REQUEST);
         }
@@ -64,7 +57,6 @@ public class LocationController implements LocationServices{
             return new Response("Airport country must not be empty.", Status.BAD_REQUEST);
         }
 
-        // Latitud
         if (latitudeStr == null || latitudeStr.trim().isEmpty()) {
             return new Response("Latitude must not be empty.", Status.BAD_REQUEST);
         }
@@ -82,7 +74,6 @@ public class LocationController implements LocationServices{
             return new Response("Latitude must be a valid number.", Status.BAD_REQUEST);
         }
 
-        // Longitud
         if (longitudeStr == null || longitudeStr.trim().isEmpty()) {
             return new Response("Longitude must not be empty.", Status.BAD_REQUEST);
         }
@@ -99,12 +90,11 @@ public class LocationController implements LocationServices{
         } catch (NumberFormatException ex) {
             return new Response("Longitude must be a valid number.", Status.BAD_REQUEST);
         }
-        return null; // Validación exitosa
+        return null; 
     }
     @Override
     public Response createLocation(String airportIdStr, String airportName, String airportCity, String airportCountry, String latitudeStr, String longitudeStr) {
         try {
-            // Validación de formato de ID y unicidad primero
             if (airportIdStr == null || airportIdStr.trim().isEmpty()) {
                 return new Response("Airport ID must not be empty.", Status.BAD_REQUEST);
             }
@@ -116,18 +106,14 @@ public class LocationController implements LocationServices{
                 return new Response("An airport with ID '" + airportId + "' already exists.", Status.BAD_REQUEST);
             }
 
-            // Validar el resto de los datos
             Response validationResponse = validateLocationData(airportId, airportName, airportCity, airportCountry, latitudeStr, longitudeStr);
             if (validationResponse != null) {
-                // Re-chequea el mensaje de ID ya que validateLocationData también lo valida
-                // pero la unicidad es más prioritaria si falla el formato.
                 if (validationResponse.getMessage().contains("Airport ID") && !AIRPORT_ID_PATTERN.matcher(airportId).matches()) {
                      return new Response("Airport ID must be exactly 3 uppercase letters (e.g., JFK).", Status.BAD_REQUEST);
                 }
                 return validationResponse;
             }
 
-            // Parseo final (ya que la validación de formato numérico se hizo en validateLocationData)
             double latitude = Double.parseDouble(latitudeStr.trim());
             double longitude = Double.parseDouble(longitudeStr.trim());
 
@@ -135,12 +121,9 @@ public class LocationController implements LocationServices{
                                                 airportCountry.trim(), latitude, longitude);
 
             if (!locationStorage.addLocation(newLocation)) {
-                // Este caso es menos probable si la validación de ID único ya pasó.
                 return new Response("Failed to add location, ID might already exist or another storage error occurred.", Status.INTERNAL_SERVER_ERROR);
             }
 
-            // Patrón Prototype: Devolver una copia del objeto creado
-            // Asegúrate de que tu clase Location implemente Cloneable y tenga un método clone()
             try {
                 Location locationCopy = (Location) newLocation.clone();
                 return new Response("Location created successfully.", Status.CREATED, locationCopy);
@@ -151,16 +134,12 @@ public class LocationController implements LocationServices{
 
         } catch (Exception ex) {
             System.err.println("Unexpected error in createLocation: " + ex.getMessage());
-            // ex.printStackTrace(); // Para depuración
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    // SRP: Método para obtener todas las localizaciones para la vista.
     @Override
     public Response getAllLocations() {
         try {
-            // ILocationStorage.getLocations() debe devolver la lista ordenada por Airport ID
             ArrayList<Location> locations = locationStorage.getLocations();
 
             if (locations == null) { // El storage no debería devolver null
@@ -169,21 +148,18 @@ public class LocationController implements LocationServices{
              if (locations.isEmpty()){
                  return new Response("No locations found.", Status.NOT_FOUND, new ArrayList<Location>());
             }
-
-            // Patrón Prototype: Devolver una lista de copias
             ArrayList<Location> locationCopies = new ArrayList<>();
             for (Location loc : locations) {
                 try {
-                    locationCopies.add((Location) loc.clone()); // Asume que Location implementa clone()
+                    locationCopies.add((Location) loc.clone()); 
                 } catch (Exception e) {
                     System.err.println("Error cloning location with ID " + loc.getAirportId() + ": " + e.getMessage());
-                    // Omitir o manejar error
                 }
             }
             return new Response("Locations retrieved successfully.", Status.SUCCESS, locationCopies);
         } catch (Exception ex) {
             System.err.println("Unexpected error in getAllLocations: " + ex.getMessage());
-            // ex.printStackTrace();
+            
             return new Response("An unexpected server error occurred while retrieving locations.", Status.INTERNAL_SERVER_ERROR);
         }
     }
@@ -192,7 +168,7 @@ public class LocationController implements LocationServices{
     @Override
     public Response getLocationDisplayInfoForComboBox() {
         try {
-            // ILocationStorage.getLocations() debe devolver la lista ordenada por Airport ID
+        
             ArrayList<Location> locations = locationStorage.getLocations();
             ArrayList<String[]> locationDisplayInfo = new ArrayList<>();
             
@@ -211,7 +187,7 @@ public class LocationController implements LocationServices{
             return new Response("Location info for ComboBox retrieved.", Status.SUCCESS, locationDisplayInfo);
         } catch (Exception ex) {
             System.err.println("Unexpected error in getLocationDisplayInfoForComboBox: " + ex.getMessage());
-            // ex.printStackTrace();
+         
             return new Response("Error retrieving location info for ComboBox.", Status.INTERNAL_SERVER_ERROR);
         }
     }

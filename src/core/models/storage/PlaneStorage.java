@@ -19,21 +19,21 @@ import core.models.storage.interfaces.IPlaneStorage;
     public class PlaneStorage implements Subject, IPlaneStorage {
     private static PlaneStorage instance;
     private ArrayList<Plane> planes;
-    private final ArrayList<Observer> observers; // 2. Añadir lista de observadores (usando ArrayList)
+    private final ArrayList<Observer> observers;
 
     private PlaneStorage() {
         this.planes = new ArrayList<>();
-        this.observers = new ArrayList<>(); // Inicializar la lista de observadores
+        this.observers = new ArrayList<>();
     }
 
-    public static synchronized PlaneStorage getInstance() { // Sincronizado para seguridad
+    public static synchronized PlaneStorage getInstance() { 
         if (instance == null) {
             instance = new PlaneStorage();
         }
         return instance;
     }
 
-    // 3. Implementación de los métodos de Subject
+    
     @Override
     public void registerObserver(Observer observer) {
         if (observer != null && !observers.contains(observer)) {
@@ -48,27 +48,25 @@ import core.models.storage.interfaces.IPlaneStorage;
         }
     }
     public ArrayList<Plane> getPlanes() {
-    ArrayList<Plane> planesCopy = new ArrayList<>(this.planes); // Crea una copia
-    // Ordena la copia por ID antes de devolverla
-    // Asumiendo que Plane.getId() devuelve un String comparable
+    ArrayList<Plane> planesCopy = new ArrayList<>(this.planes);
     Collections.sort(planesCopy, Comparator.comparing(Plane::getId));
     return planesCopy;
 }
     @Override
     public void notifyObservers() {
-        ArrayList<Observer> observersCopy = new ArrayList<>(this.observers); // Copia para iteración segura
+        ArrayList<Observer> observersCopy = new ArrayList<>(this.observers); 
         System.out.println("PlaneStorage: Notificando a " + observersCopy.size() + " observador(es)...");
         for (Observer observer : observersCopy) {
             observer.update();
         }
     }
-    // Fin de métodos de Subject
+ 
 
     public boolean addPlane(Plane plane) {
-        if (plane == null || plane.getId() == null) { // Buena idea chequear si plane o su ID es null
+        if (plane == null || plane.getId() == null) { 
             return false;
         }
-        // Usar el método planeIdExists para la lógica de unicidad
+        
         if (planeIdExists(plane.getId())) {
             return false;
         }
@@ -81,7 +79,6 @@ import core.models.storage.interfaces.IPlaneStorage;
     public Plane getPlane(String id) {
         if (id == null) return null;
         for (Plane p : this.planes) {
-            // Corrección: Usar .equals() para comparar Strings
             if (id.equals(p.getId())) {
                 return p;
             }
@@ -93,7 +90,6 @@ import core.models.storage.interfaces.IPlaneStorage;
         if (id == null) return false;
         Plane planeToRemove = null;
         for (Plane plane : this.planes) {
-            // Corrección: Usar .equals() para comparar Strings
             if (id.equals(plane.getId())) {
                 planeToRemove = plane;
                 break;
@@ -102,7 +98,7 @@ import core.models.storage.interfaces.IPlaneStorage;
         if (planeToRemove != null) {
             this.planes.remove(planeToRemove);
             System.out.println("PlaneStorage: Avión eliminado. ID: " + id);
-            notifyObservers(); // 4. Notificar después de eliminar
+            notifyObservers(); 
             return true;
         }
         return false;
@@ -111,28 +107,10 @@ import core.models.storage.interfaces.IPlaneStorage;
     public boolean planeIdExists(String id) {
         if (id == null) return false;
         for (Plane p : this.planes) {
-            // Corrección: Usar .equals() para comparar Strings
             if (id.equals(p.getId())) {
                 return true;
             }
         }
         return false;
     }
-
-
-    // Ejemplo de cómo se vería un método de actualización (si lo necesitas)
-    // public boolean updatePlane(Plane planeToUpdate) {
-    //     if (planeToUpdate == null || planeToUpdate.getId() == null) {
-    //         return false;
-    //     }
-    //     for (int i = 0; i < this.planes.size(); i++) {
-    //         if (planeToUpdate.getId().equals(this.planes.get(i).getId())) {
-    //             this.planes.set(i, planeToUpdate); // Actualiza el avión en la lista
-    //             System.out.println("PlaneStorage: Avión actualizado. ID: " + planeToUpdate.getId());
-    //             notifyObservers(); // 4. Notificar después de actualizar
-    //             return true;
-    //         }
-    //     }
-    //     return false; // No se encontró el avión para actualizar
-    // }
 }

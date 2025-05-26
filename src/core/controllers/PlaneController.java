@@ -38,7 +38,6 @@ public class PlaneController implements PlaneServices{
                 return new Response("Airplane model must not be empty.", Status.BAD_REQUEST);
             }
 
-            // 4. Max Capacity validation
             if (maxCapacityStr == null || maxCapacityStr.trim().isEmpty()) {
                 return new Response("Maximum capacity must not be empty.", Status.BAD_REQUEST);
             }
@@ -52,7 +51,6 @@ public class PlaneController implements PlaneServices{
                 return new Response("Maximum capacity must be a valid number.", Status.BAD_REQUEST);
             }
 
-            // 5. Airline validation
             if (airline == null || airline.trim().isEmpty()) {
                 return new Response("Airline must not be empty.", Status.BAD_REQUEST);
             }

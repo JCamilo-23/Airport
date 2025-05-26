@@ -54,7 +54,7 @@ public class FlightTableController {
                                         flight.getDepartureDate().format(dateTimeFormatter) : "N/A";
 
                     String arrDateStr = "N/A";
-//                    if (flight.getDepartureDate() != null && flight.getHoursDurationArrival() != null && flight.getMinutesDurationArrival() != null) {
+
                        try {
                            LocalDateTime arrivalDateTime = flight.getDepartureDate()
                                .plusHours((long) flight.getHoursDurationArrival())

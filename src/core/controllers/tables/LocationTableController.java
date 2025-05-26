@@ -32,7 +32,7 @@ public class LocationTableController {
         }
         
         DefaultTableModel model = (DefaultTableModel) this.locationTable.getModel();
-        model.setRowCount(0); // Limpiar tabla
+        model.setRowCount(0);
         ArrayList<Location> alllocations = LocationStorage.getInstance().getLocations(); //
 
         if (alllocations != null) {

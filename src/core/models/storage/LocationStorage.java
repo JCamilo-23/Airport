@@ -16,25 +16,25 @@ import java.util.Comparator;
  *
  * @author brayan
  */
-    public class LocationStorage implements Subject, ILocationStorage   { // 1. Implementar Subject
+    public class LocationStorage implements Subject, ILocationStorage   { 
     // Instancia Singleton
     private static LocationStorage instance;
     private ArrayList<Location> locations;
-    private final ArrayList<Observer> observers; // 2. Añadir lista de observadores
+    private final ArrayList<Observer> observers; 
 
     private LocationStorage() {
         this.locations = new ArrayList<>();
-        this.observers = new ArrayList<>(); // Inicializar la lista de observadores
+        this.observers = new ArrayList<>(); 
     }
 
-    public static synchronized LocationStorage getInstance() { // Sincronizado
+    public static synchronized LocationStorage getInstance() { 
         if (instance == null) {
             instance = new LocationStorage();
         }
         return instance;
     }
 
-    // 3. Implementación de los métodos de Subject
+
     @Override
     public void registerObserver(Observer observer) {
         if (observer != null && !observers.contains(observer)) {
@@ -49,10 +49,10 @@ import java.util.Comparator;
         }
     }
     
-    @Override // Añade si getLocations() está en ILocationStorage
+    @Override
     public ArrayList<Location> getLocations() {
     ArrayList<Location> sortedLocations = new ArrayList<>(this.locations);
-    if (sortedLocations.size() > 1) { // Solo ordenar si hay más de un elemento
+    if (sortedLocations.size() > 1) { 
         Collections.sort(sortedLocations, Comparator.comparing(Location::getAirportId));
     }
     return sortedLocations;
@@ -71,20 +71,18 @@ import java.util.Comparator;
         if (location == null || location.getAirportId() == null) {
             return false;
         }
-        // Usar el método LocationIdExists para la lógica de unicidad
         if (LocationIdExists(location.getAirportId())) {
             return false;
         }
         this.locations.add(location);
         System.out.println("LocationStorage: Localización agregada. ID: " + location.getAirportId());
-        notifyObservers(); // 4. Notificar después de agregar
+        notifyObservers(); 
         return true;
     }
 
     public Location getLocation(String id) {
         if (id == null) return null;
         for (Location loc : this.locations) {
-            // Corrección: Usar .equals() para comparar Strings
             if (id.equals(loc.getAirportId())) {
                 return loc;
             }
@@ -96,7 +94,6 @@ import java.util.Comparator;
         if (id == null) return false;
         Location locationToRemove = null;
         for (Location location : this.locations) {
-            // Corrección: Usar .equals() para comparar Strings
             if (id.equals(location.getAirportId())) {
                 locationToRemove = location;
                 break;
@@ -114,7 +111,6 @@ import java.util.Comparator;
     public boolean LocationIdExists(String id) {
         if (id == null) return false;
         for (Location loc : this.locations) {
-            // Corrección: Usar .equals() para comparar Strings
             if (id.equals(loc.getAirportId())) {
                 return true;
             }

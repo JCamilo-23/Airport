@@ -36,12 +36,11 @@ import java.util.Comparator;
         return instance;
     }
 
-    // Implementación de métodos de Subject
      @Override
     public ArrayList<Passenger> getPassengers() {
         ArrayList<Passenger> sortedPassengers = new ArrayList<>(this.passengers);
         Collections.sort(sortedPassengers, Comparator.comparingLong(Passenger::getId));
-        return sortedPassengers; // Devuelve la copia ordenada
+        return sortedPassengers;
     }
     
     @Override
@@ -60,14 +59,12 @@ import java.util.Comparator;
 
     @Override
     public void notifyObservers() {
-        // Crear una copia para iterar es más seguro, incluso con ArrayList
         ArrayList<Observer> observersCopy = new ArrayList<>(this.observers);
         System.out.println("PassengerStorage: Notificando a " + observersCopy.size() + " observador(es)...");
         for (Observer observer : observersCopy) {
             observer.update();
         }
     }
-    // Fin de métodos de Subject
 
     public boolean addPassenger(Passenger passenger) {
         if (passenger == null || passengerIdExists(passenger.getId())) {
@@ -89,7 +86,7 @@ import java.util.Comparator;
     }
 
     public Passenger getPassengerById(long id) {
-        return getPassenger(id); // Reutiliza el método existente
+        return getPassenger(id);
     }
 
     public boolean deletePassenger(long id) {
@@ -103,7 +100,7 @@ import java.util.Comparator;
         if (passengerToRemove != null) {
             this.passengers.remove(passengerToRemove);
             System.out.println("PassengerStorage: Pasajero eliminado. ID: " + id);
-            notifyObservers(); // Notificar
+            notifyObservers();
             return true;
         }
         return false;
@@ -117,7 +114,7 @@ import java.util.Comparator;
             if (this.passengers.get(i).getId() == passengerToUpdate.getId()) {
                 this.passengers.set(i, passengerToUpdate);
                 System.out.println("PassengerStorage: Pasajero actualizado. ID: " + passengerToUpdate.getId());
-                notifyObservers(); // Notificar
+                notifyObservers(); 
                 return true;
             }
         }
