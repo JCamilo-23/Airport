@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package core.models.flight;
+package core.models.calculate;
 
 import core.models.flight.Flight;
 import java.time.LocalDateTime;
@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
  *
  * @author Admin
  */
-public class ArrivalDate{
+public class CalculateArrivalDate{
     
-    private Flight flight;
+    private final Flight flight;
 
-    public ArrivalDate(Flight flight) {
+    public CalculateArrivalDate(Flight flight) {
         this.flight = flight;
     }
     

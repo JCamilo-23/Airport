@@ -4,6 +4,7 @@
  */
 package core.controllers.tables;
 
+import core.models.calculate.PassengerFormats;
 import core.models.person.Passenger;
 import core.models.storage.PassengerStorage;
 import java.time.LocalDate;
@@ -38,8 +39,9 @@ public class PassengerTableController {
         if (allPassengers != null) {
             for (Passenger passenger : allPassengers) {
                 if (passenger != null) {
+                    PassengerFormats format = new PassengerFormats(passenger);
                     String id = String.valueOf(passenger.getId());
-                    String name = passenger.getFullname();
+                    String name = format.getFullname();
                     String birthdate = (passenger.getBirthDate() != null) ?
                                        passenger.getBirthDate().format(dateFormatter) : "N/A";
                     
@@ -51,7 +53,8 @@ public class PassengerTableController {
                             System.err.println("No se pudo determinar la edad para el pasajero " + id + ": " + e.getMessage());
                         }
                     }
-                    String phone = passenger.generateFullPhone();
+
+                    String phone = format.generateFullPhone();
                     String country = passenger.getCountry() != null ? passenger.getCountry() : "N/A";
                     int numFlights = (passenger.getFlights() != null) ? passenger.getFlights().size() : 0;
 

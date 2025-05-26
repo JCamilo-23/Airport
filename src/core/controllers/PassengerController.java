@@ -6,6 +6,8 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.controllers.services.PassengerServices;
+import core.models.calculate.PassengerFormats;
 import core.models.flight.Flight;
 import core.models.person.Passenger;
 import core.models.storage.FlightStorage;
@@ -16,18 +18,16 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import javax.swing.JComboBox;
 
 /**
  *
  * @author Admin
  */
-public class PassengerController{
+public class PassengerController implements PassengerServices{
     // DIP: Usar interfaces para las dependencias de 
     private static IPassengerStorage passengerStorage = (IPassengerStorage) PassengerStorage.getInstance();
     private static IFlightStorage flightStorage = (IFlightStorage) FlightStorage.getInstance();
 
-    // --- SRP: Método privado para validación de datos base del pasajero ---
     private static Response validatePassengerBaseData(String firstName, String lastName,
                                                       String yearStr, String monthStr, String dayStr,
                                                       String phoneCodeStr, String phoneNumberStr, String country) {
@@ -89,8 +89,8 @@ public class PassengerController{
         }
         return null; // Validación base exitosa
     }
-
-    public static Response registerPassenger(String idStr, String firstName, String lastName, String yearStr, String monthStr, String dayStr, String phoneCodeStr, String phoneNumberStr, String country) {
+    @Override
+    public  Response registerPassenger(String idStr, String firstName, String lastName, String yearStr, String monthStr, String dayStr, String phoneCodeStr, String phoneNumberStr, String country) {
         try {
             // Validación específica del ID para el registro
             if (idStr == null || idStr.trim().isEmpty()) {
@@ -132,17 +132,22 @@ public class PassengerController{
             if (!passengerStorage.addPassenger(newPassenger)) {
                 return new Response("Error saving passenger, ID might be duplicated or another issue occurred.", Status.INTERNAL_SERVER_ERROR);
             }
+            try {
+                Passenger passengerCopy = (Passenger) newPassenger.clone(); // Patrón Prototype
+                return new Response("Passenger created successfully.", Status.CREATED, passengerCopy);
 
-            Passenger passengerCopy = (Passenger) newPassenger.clone(); // Patrón Prototype
-            return new Response("Passenger created successfully.", Status.CREATED, passengerCopy);
-
+            } catch (Exception e) {
+                System.err.println("Cloning not supported for Passenger: " + e.getMessage());
+                return new Response("Passenger created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
+            }
+            
         } catch (Exception ex) {
             System.err.println("Unexpected error in registerPassenger: " + ex.getMessage());
             return new Response("Unexpected server error: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    public static Response updatePassenger(String idStrToUpdate, String newFirstName, String newLastName,
+    @Override
+    public Response updatePassenger(String idStrToUpdate, String newFirstName, String newLastName,
                                            String newYearStr, String newMonthStr, String newDayStr,
                                            String newPhoneCodeStr, String newPhoneNumberStr, String newCountry) {
         try {
@@ -194,8 +199,8 @@ public class PassengerController{
             return new Response("Unexpected server error during update: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    public static Response getAllPassengers() {
+    @Override
+    public Response getAllPassengers() {
         try {
             // IPassengerStorage.getPassengers() debe devolver la lista ordenada por ID
             ArrayList<Passenger> passengers = passengerStorage.getPassengers();
@@ -223,8 +228,8 @@ public class PassengerController{
             return new Response("An unexpected server error occurred while retrieving passengers.", Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    public static Response asignFlight(String passengerIdStr, String flightIdFromComboBox) {
+    @Override
+    public Response asignFlight(String passengerIdStr, String flightIdFromComboBox) {
         try {
             if (passengerIdStr == null || passengerIdStr.trim().isEmpty()) {
                 return new Response("Passenger ID must not be empty.", Status.BAD_REQUEST);
@@ -254,9 +259,10 @@ public class PassengerController{
             if (flight.getNumPassengers() >= flight.getPlane().getMaxCapacity()) {
                 return new Response("Flight " + flightId + " is full. Cannot add passenger " + passengerId + ".", Status.BAD_REQUEST);
             }
-            FlightStorage storage = FlightStorage.getInstance();
-            if (storage.flightIdExists(flightId)) {
-                 return new Response("Passenger " + passengerId + " is already assigned to flight " + flightId + ".", Status.BAD_REQUEST);
+            for(Flight f: passenger.getFlights()){
+                if(f.getId().equals(flightId)){
+                    return new Response("Passenger " + passengerId + " is already assigned to flight " + flightId + ".", Status.BAD_REQUEST);     
+                }
             }
 
             flight.addPassenger(passenger);
@@ -278,8 +284,8 @@ public class PassengerController{
             return new Response("An unexpected server error occurred during flight assignment: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-    
-    public static Response getFlightsForPassenger(String passengerIdStr) {
+    @Override
+    public Response getFlightsForPassenger(String passengerIdStr) {
         try {
             if (passengerIdStr == null || passengerIdStr.trim().isEmpty()) {
                 return new Response("Passenger ID must not be empty for fetching flights.", Status.BAD_REQUEST);
@@ -330,17 +336,18 @@ public class PassengerController{
         }
     }
 
- 
-    public static Response getPassengerDisplayInfoForComboBox() {
+    @Override
+    public Response getPassengerDisplayInfoForComboBox() {
         try {
             // IPassengerStorage.getPassengers() debe devolver la lista ordenada por ID
             ArrayList<Passenger> passengers = passengerStorage.getPassengers();
             ArrayList<String[]> displayInfo = new ArrayList<>();
 
             if (passengers == null) { passengers = new ArrayList<>(); }
-
+            
             for (Passenger p : passengers) {
-                displayInfo.add(new String[]{String.valueOf(p.getId()), p.getFullname()});
+                PassengerFormats format = new PassengerFormats(p);
+                displayInfo.add(new String[]{String.valueOf(p.getId()), format.getFullname()});
             }
             
             if (displayInfo.isEmpty() && passengers.isEmpty()) {
@@ -350,13 +357,6 @@ public class PassengerController{
         } catch (Exception ex) {
             System.err.println("Unexpected error in getPassengerDisplayInfoForComboBox: " + ex.getMessage());
             return new Response("Error retrieving passenger info for ComboBox: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public static void storageDownload(JComboBox jbox){
-        PassengerStorage storage = PassengerStorage.getInstance();
-        for (Passenger s : storage.getPassengers()) {
-            jbox.addItem(""+s.getId());
         }
     }
 }

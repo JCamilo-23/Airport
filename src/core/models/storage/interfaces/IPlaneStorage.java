@@ -15,7 +15,5 @@ public interface IPlaneStorage {
     boolean addPlane(Plane plane);
     Plane getPlane(String id);
     boolean planeIdExists(String id);
-    ArrayList<Plane> getPlanes(); // Recuerda que esto debe devolver la lista ordenada por ID
-    // boolean deletePlane(String id); // Si lo tienes
-    // boolean updatePlane(Plane plane); // Si lo tienes
+    ArrayList<Plane> getPlanes();
 }

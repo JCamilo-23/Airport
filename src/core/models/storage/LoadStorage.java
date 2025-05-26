@@ -73,8 +73,7 @@ public class LoadStorage {
                 Plane plane = new Plane(id, brand, model, maxCapacity, airline);
                 if (planeSto
                         != null) { 
-                    planeSto
-                            .addPlane(plane);
+                    planeSto.addPlane(plane);
                 } else {
                     System.err.println("PlaneStorage is null. Cannot add plane.");
                 }

@@ -6,18 +6,18 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.controllers.services.LocationServices;
 import core.models.Location;
 import core.models.storage.LocationStorage;
 import core.models.storage.interfaces.ILocationStorage;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
-import javax.swing.JComboBox;
 
 /**
  *
  * @author Admin
  */
-public class LocationController {
+public class LocationController implements LocationServices{
     
     // DIP: Depender de la abstracción (interfaz)
     private static ILocationStorage locationStorage = (ILocationStorage) LocationStorage.getInstance();
@@ -26,7 +26,8 @@ public class LocationController {
     private static final Pattern AIRPORT_ID_PATTERN = Pattern.compile("[A-Z]{3}");
 
     // Helper para validar decimales (ya lo tenías, está bien aquí como privado)
-    private static boolean hasAtMostFourDecimalPlaces(String valueStr) {
+    @Override
+    public boolean hasAtMostFourDecimalPlaces(String valueStr) {
         if (valueStr.contains(".")) {
             // Rechazar si contiene 'e' o 'E' (notación científica no deseada para este formato)
             if (valueStr.toLowerCase().contains("e")) {
@@ -40,7 +41,7 @@ public class LocationController {
     }
 
     // --- SRP: Método privado para validación de datos de la localización ---
-    private static Response validateLocationData(String airportId, String airportName, String airportCity,
+    private Response validateLocationData(String airportId, String airportName, String airportCity,
                                                  String airportCountry, String latitudeStr, String longitudeStr) {
         // Airport ID (Formato y unicidad se validan en createLocation antes de llamar aquí si es creación)
         // Aquí validamos el formato general si no se ha hecho antes o para una actualización.
@@ -100,8 +101,8 @@ public class LocationController {
         }
         return null; // Validación exitosa
     }
-
-    public static Response createLocation(String airportIdStr, String airportName, String airportCity, String airportCountry, String latitudeStr, String longitudeStr) {
+    @Override
+    public Response createLocation(String airportIdStr, String airportName, String airportCity, String airportCountry, String latitudeStr, String longitudeStr) {
         try {
             // Validación de formato de ID y unicidad primero
             if (airportIdStr == null || airportIdStr.trim().isEmpty()) {
@@ -142,10 +143,10 @@ public class LocationController {
             // Asegúrate de que tu clase Location implemente Cloneable y tenga un método clone()
             try {
                 Location locationCopy = (Location) newLocation.clone();
-                return new Response("Airport created successfully.", Status.CREATED, locationCopy);
+                return new Response("Location created successfully.", Status.CREATED, locationCopy);
             } catch (Exception e) {
                 System.err.println("Cloning not supported for Location: " + e.getMessage());
-                return new Response("Airport created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
+                return new Response("Location created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
             }
 
         } catch (Exception ex) {
@@ -156,7 +157,8 @@ public class LocationController {
     }
 
     // SRP: Método para obtener todas las localizaciones para la vista.
-    public static Response getAllLocations() {
+    @Override
+    public Response getAllLocations() {
         try {
             // ILocationStorage.getLocations() debe devolver la lista ordenada por Airport ID
             ArrayList<Location> locations = locationStorage.getLocations();
@@ -186,11 +188,9 @@ public class LocationController {
         }
     }
 
-    /**
-     * SRP: Devuelve la información necesaria para que la Vista pueble ComboBoxes de localizaciones.
-     * @return Response con ArrayList de String[] {airportId, "airportId - airportName (airportCity)"}.
-     */
-    public static Response getLocationDisplayInfoForComboBox() {
+
+    @Override
+    public Response getLocationDisplayInfoForComboBox() {
         try {
             // ILocationStorage.getLocations() debe devolver la lista ordenada por Airport ID
             ArrayList<Location> locations = locationStorage.getLocations();
@@ -213,13 +213,6 @@ public class LocationController {
             System.err.println("Unexpected error in getLocationDisplayInfoForComboBox: " + ex.getMessage());
             // ex.printStackTrace();
             return new Response("Error retrieving location info for ComboBox.", Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public static void storageDownload(JComboBox jbox){
-        LocationStorage storage = LocationStorage.getInstance();
-        for (Location loc : storage.getLocations()) {
-            jbox.addItem(""+loc.getAirportId());
         }
     }
 }

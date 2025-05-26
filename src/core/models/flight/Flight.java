@@ -7,7 +7,7 @@ package core.models.flight;
 import core.models.person.Passenger;
 import core.models.Plane;
 import core.models.Location;
-import core.models.Prototype;
+import core.models.utils.Prototype;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 

@@ -6,6 +6,7 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.controllers.services.FlightServices;
 import core.models.Location;
 import core.models.Plane;
 import core.models.flight.Delay;
@@ -20,21 +21,21 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.regex.Pattern;
-import javax.swing.JComboBox;
 
 /**
  *
  * @author Admin
  */
-public class FlightController {
+public class FlightController implements FlightServices{
    
-    private static FlightStorage flightStorage = FlightStorage.getInstance(); 
-    private static PlaneStorage planeStorage = PlaneStorage.getInstance();
-    private static LocationStorage locationStorage = LocationStorage.getInstance();
-    private static PassengerStorage passengerStorage = PassengerStorage.getInstance();
+    private final FlightStorage flightStorage = FlightStorage.getInstance(); 
+    private final PlaneStorage planeStorage = PlaneStorage.getInstance();
+    private final LocationStorage locationStorage = LocationStorage.getInstance();
+    private final PassengerStorage passengerStorage = PassengerStorage.getInstance();
 
-    private static final Pattern FLIGHT_ID_PATTERN = Pattern.compile("^[A-Z]{3}\\d{3}$");
-    public static Response createFlight(String flightId,String planeId,
+    private final Pattern FLIGHT_ID_PATTERN = Pattern.compile("^[A-Z]{3}\\d{3}$");
+    @Override
+    public Response createFlight(String flightId,String planeId,
                                         String departureLocationId, String arrivalLocationId,
                                         String scaleLocationId,
                                         String year,String month, String day, String hour, String minutes,
@@ -141,15 +142,47 @@ public class FlightController {
             if (!flightStorage.addFlight(newFlight)) {
                 return new Response("Failed to save the flight. ID conflict might have occurred.", Status.BAD_REQUEST);
             }
-
-            return new Response("Flight created successfully.", Status.CREATED); 
-
+            try {
+                Flight flightCopy = (Flight) newFlight.clone();
+                return new Response("Flight created successfully.", Status.CREATED, flightCopy);
+            } catch (Exception e) {
+                System.err.println("Cloning not supported for Flight: " + e.getMessage());
+                return new Response("Flight created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
+            }
         } catch (Exception ex) {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-    
-    public static Response addPassengerToFlight(String flightId, long passengerId) {
+    @Override
+    public Response getAllFlights() {
+        try {
+            ArrayList<Flight> flights = flightStorage.getFlights();
+
+            if (flights == null) {
+                flights = new ArrayList<>();
+            }
+
+            if (flights.isEmpty()) {
+                return new Response("No flights found.", Status.NOT_FOUND, new ArrayList<Flight>());
+            }
+
+            ArrayList<Flight> flightCopies = new ArrayList<>();
+            for (Flight f : flights) {
+                try {
+                    flightCopies.add((Flight) f.clone());
+                } catch (Exception e) {
+                    System.err.println("Error cloning flight with ID " + f.getId() + ": " + e.getMessage());
+                }
+            }
+            return new Response("Flights retrieved successfully.", Status.SUCCESS, flightCopies);
+        } catch (Exception ex) {
+            System.err.println("Unexpected error in getAllFlights: " + ex.getMessage());
+            ex.printStackTrace();
+            return new Response("An unexpected server error occurred while retrieving flights.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @Override
+    public Response addPassengerToFlight(String flightId, long passengerId) {
         try {
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight ID must not be empty.", Status.BAD_REQUEST);
@@ -178,8 +211,8 @@ public class FlightController {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-
-    public static Response delayFlight(String flightId, String hoursStr, String minutesStr) {
+    @Override
+    public Response delayFlight(String flightId, String hoursStr, String minutesStr) {
         try {
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight ID must not be empty.", Status.BAD_REQUEST);
@@ -213,20 +246,8 @@ public class FlightController {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-    public static Response getAllFlights() {
-        try {
-            ArrayList<Flight> flights = flightStorage.getFlights();
-            if (flights == null) { 
-                flights = new ArrayList<>();
-            }
-            flights.sort(Comparator.comparing(Flight::getDepartureDate));
-              return new Response("Flights retrieved successfully.", Status.OK);
-        } catch (Exception ex) {
-            return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public static Response getFlightsForPassenger(long passengerId) {
+    @Override
+    public Response getFlightsForPassenger(long passengerId) {
         try {
             Passenger passenger = passengerStorage.getPassenger(passengerId);
             if (passenger == null) {
@@ -248,10 +269,5 @@ public class FlightController {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
     }
-    public static void storageDownload(JComboBox jbox){
-        FlightStorage storage = FlightStorage.getInstance();
-        for (Flight f : storage.getFlights()) {
-            jbox.addItem(""+f.getId());
-        }
-    }
+
 }

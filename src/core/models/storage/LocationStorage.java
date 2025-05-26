@@ -121,21 +121,4 @@ import java.util.Comparator;
         }
         return false;
     }
-
-
-    // Si necesitas un método para actualizar localizaciones, se vería así:
-    // public boolean updateLocation(Location locationToUpdate) {
-    //     if (locationToUpdate == null || locationToUpdate.getAirportId() == null) {
-    //         return false;
-    //     }
-    //     for (int i = 0; i < this.locations.size(); i++) {
-    //         if (locationToUpdate.getAirportId().equals(this.locations.get(i).getAirportId())) {
-    //             this.locations.set(i, locationToUpdate);
-    //             System.out.println("LocationStorage: Localización actualizada. ID: " + locationToUpdate.getAirportId());
-    //             notifyObservers(); // 4. Notificar después de actualizar
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
 }

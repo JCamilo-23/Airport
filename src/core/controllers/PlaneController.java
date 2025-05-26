@@ -4,18 +4,20 @@
  */
 package core.controllers;
 
+import core.controllers.services.PlaneServices;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Plane;
 import core.models.storage.PlaneStorage;
-import javax.swing.JComboBox;
+import java.util.ArrayList;
 
 /**
  *
  * @author Admin
  */
-public class PlaneController {
-    public static Response createPlane(String idStr, String brand, String model, String maxCapacityStr, String airline){
+public class PlaneController implements PlaneServices{
+    @Override
+    public Response createPlane(String idStr, String brand, String model, String maxCapacityStr, String airline){
         try{
             if (idStr == null || idStr.trim().isEmpty()) {
                 return new Response("Airplane ID must not be empty.", Status.BAD_REQUEST);
@@ -60,17 +62,45 @@ public class PlaneController {
                 return new Response("Error saving airplane. The ID might have been registered simultaneously.", Status.BAD_REQUEST);
             }
 
-            return new Response("Airplane created successfully.", Status.CREATED, newAirplane);
-
+            try{
+                Plane airplaneCopy = (Plane) newAirplane.clone(); // Patrón Prototype
+                return new Response("Passenger created successfully.", Status.CREATED, airplaneCopy);
+            }catch(Exception e){
+                System.err.println("Cloning not supported for Plane: " + e.getMessage());
+                return new Response("Plane created, but failed to clone the response object.", Status.INTERNAL_SERVER_ERROR);
+            }
         } catch (Exception ex) {
             return new Response("An unexpected server error occurred: " + ex.getMessage(), Status.INTERNAL_SERVER_ERROR);
         }
-    
+        
     }
-    public static void storageDownload(JComboBox jbox){
-        PlaneStorage storage = PlaneStorage.getInstance();
-        for (Plane p : storage.getPlanes()) {
-            jbox.addItem(""+p.getId());
+    @Override
+    public Response getAllPlanes() {
+        try {
+            PlaneStorage storage = PlaneStorage.getInstance();
+            ArrayList<Plane> planes = storage.getPlanes(); 
+
+            if (planes == null) { 
+                planes = new ArrayList<>(); 
+            }
+            
+            if (planes.isEmpty()) {
+                return new Response("No planes found.", Status.NOT_FOUND, new ArrayList<Plane>());
+            }
+
+            ArrayList<Plane> planeCopies = new ArrayList<>();
+            for (Plane p : planes) {
+                try {
+                    planeCopies.add((Plane) p.clone()); // Patrón Prototype
+                } catch (Exception e) { 
+                    System.err.println("Error cloning plane with ID " + p.getId() + ": " + e.getMessage());
+                }
+            }
+            return new Response("Planes retrieved successfully.", Status.SUCCESS, planeCopies);
+        } catch (Exception ex) {
+            System.err.println("Unexpected error in getAllPlanes: " + ex.getMessage());
+            ex.printStackTrace();
+            return new Response("An unexpected server error occurred while retrieving planes.", Status.INTERNAL_SERVER_ERROR);
         }
     }
 }

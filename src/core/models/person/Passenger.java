@@ -4,10 +4,9 @@
  */
 package core.models.person;
 
-import core.models.Prototype;
+import core.models.utils.Prototype;
 import core.models.flight.Flight;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 
 /**
@@ -94,28 +93,12 @@ public class Passenger implements Prototype<Passenger>{
 
     public void setCountry(String country) {
         this.country = country;
-    }
-    
-    public String getFullname() {
-        return firstname + " " + lastname;
-    }
-    
-    public String generateFullPhone() {
-        return "+" + countryPhoneCode + " " + phone;
-    }
-    
-    public int calculateAge() {
-        return Period.between(birthDate, LocalDate.now()).getYears();
-    }
-    
-    public int getNumFlights() {
-        return flights.size();
     }    
 
     @Override
     public Passenger clone() {
     Passenger clone = new Passenger(id, firstname, lastname, birthDate, countryPhoneCode, phone, country);
-    clone.getFlights().addAll(flights); // o clone.flights = new ArrayList<>(this.flights);
+    clone.getFlights().addAll(flights);
     return clone;
 }
 }

@@ -4,6 +4,8 @@
  */
 package core.models;
 
+import core.models.utils.Prototype;
+
 /**
  *
  * @author edangulo

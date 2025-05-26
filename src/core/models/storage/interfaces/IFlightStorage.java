@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public interface IFlightStorage {
     boolean addFlight(Flight flight);
     Flight getFlight(String id);
-    boolean updateFlight(Flight flight); // Necesario para asignFlight y Observer
+    boolean updateFlight(Flight flight);
     ArrayList<Flight> getFlights();
     boolean flightIdExists(String id);
 }
