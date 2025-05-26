@@ -4,6 +4,7 @@
  */
 package core.controllers.tables;
 
+import core.models.calculate.PassengerCalculate;
 import core.models.calculate.PassengerFormats;
 import core.models.person.Passenger;
 import core.models.storage.PassengerStorage;
@@ -48,7 +49,9 @@ public class PassengerTableController {
                     String ageStr = "N/A";
                     if (passenger.getBirthDate() != null) {
                         try {
-                            ageStr = String.valueOf(Period.between(passenger.getBirthDate(), LocalDate.now()).getYears());
+                            PassengerCalculate calculate = new PassengerCalculate(passenger);
+                            
+                            ageStr = ""+calculate.calculateAge();
                         } catch (Exception e) {
                             System.err.println("No se pudo determinar la edad para el pasajero " + id + ": " + e.getMessage());
                         }
