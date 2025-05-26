@@ -17,14 +17,13 @@ public class LocationValidator implements ILocationValidator {
 
     private boolean hasAtMostFourDecimalPlaces(String valueStr) {
         if (valueStr.contains(".")) {
-            // Reject scientific notation for simplicity in this context
             if (valueStr.toLowerCase().contains("e")) {
                 return false;
             }
             String decimalPart = valueStr.substring(valueStr.indexOf(".") + 1);
-            return decimalPart.length() <= 4 && decimalPart.matches("\\d+"); // Ensure decimal part is all digits
+            return decimalPart.length() <= 4 && decimalPart.matches("\\d+"); 
         }
-        return true; // No decimal part, so it's valid in terms of decimal places
+        return true; 
     }
 
     @Override

@@ -50,7 +50,7 @@ public class PassengerController implements PassengerServices {
                 return baseValidationResponse;
             }
             
-            // Retrieve parsed date and phone from validator responses (if they were put in  field)
+            
             Response dateParseResponse = passengerValidator.validateAndParseDateOfBirth(yearStr, monthStr, dayStr);
             LocalDate dateOfBirth = (LocalDate) dateParseResponse.getObject(); // Assumes  is LocalDate
 
@@ -66,7 +66,7 @@ public class PassengerController implements PassengerServices {
                 return new Response("Error saving passenger, ID might be duplicated or another issue occurred.", Status.INTERNAL_SERVER_ERROR);
             }
             
-            // Clone for response (Prototype Pattern)
+
             Passenger passengerCopy = (Passenger) newPassenger.clone(); 
             return new Response("Passenger created successfully.", Status.CREATED, passengerCopy);
 
@@ -82,7 +82,7 @@ public class PassengerController implements PassengerServices {
                                     String newYearStr, String newMonthStr, String newDayStr,
                                     String newPhoneCodeStr, String newPhoneNumberStr, String newCountry) {
         try {
-            // Validate and parse ID for update
+           
             Response idValidationResponse = passengerValidator.validateAndParsePassengerId(idStrToUpdate);
             if (idValidationResponse.getStatus() != Status.SUCCESS) {
                 return idValidationResponse;
@@ -94,7 +94,7 @@ public class PassengerController implements PassengerServices {
                 return new Response("Passenger with ID " + idToUpdate + " not found.", Status.NOT_FOUND);
             }
 
-            // Validate new base passenger 
+          
             Response baseValidationResponse = passengerValidator.validatePassengerBase(
                 newFirstName, newLastName, newYearStr, newMonthStr, newDayStr, 
                 newPhoneCodeStr, newPhoneNumberStr, newCountry);
@@ -150,8 +150,7 @@ public class PassengerController implements PassengerServices {
                     passengerCopies.add((Passenger) p.clone());
                 } catch (Exception e) {
                     System.err.println("Error cloning passenger with ID " + p.getId() + " in getAllPassengers: " + e.getMessage());
-                    // Decide handling: skip, add original (risky), or return error.
-                    // For now, skipping the problematic one.
+                    
                 }
             }
             return new Response("Passengers retrieved successfully.", Status.SUCCESS, passengerCopies);
@@ -191,9 +190,9 @@ public class PassengerController implements PassengerServices {
                 return new Response("Flight " + flightId + " is full. Cannot add passenger " + passengerId + ".", Status.BAD_REQUEST);
             }
             
-            // Check if passenger already assigned to this flight
-            for(Flight f: passenger.getFlights()){ // Assumes passenger.getFlights() returns a list of flights passenger is on
-                if(f.getId().equals(flightId)){ // Assumes Flight has getId()
+
+            for(Flight f: passenger.getFlights()){ 
+                if(f.getId().equals(flightId)){ 
                     return new Response("Passenger " + passengerId + " is already assigned to flight " + flightId + ".", Status.BAD_REQUEST);    
                 }
             }
@@ -201,15 +200,13 @@ public class PassengerController implements PassengerServices {
             flight.addPassenger(passenger); // Assumes these methods manage the bidirectional relationship
             passenger.addFlight(flight);
 
-            // Persist changes
+            
             boolean flightUpdatedOk = flightStorage.updateFlight(flight); 
             boolean passengerUpdatedOk = passengerStorage.updatePassenger(passenger);
 
             if (!flightUpdatedOk || !passengerUpdatedOk) {
-                // This is a tricky situation.  might be inconsistent.
-                // Consider transactional behavior or rollback if possible, or at least log severity.
                 System.err.println("Warning: Passenger/Flight assignment updated in memory, but failed to persist all changes to storage.  might be inconsistent.");
-                // Depending on requirements, this could be a full error.
+            
                 return new Response("Flight assignment partially failed during storage update.", Status.INTERNAL_SERVER_ERROR);
             }
             
@@ -251,8 +248,6 @@ public class PassengerController implements PassengerServices {
                      System.err.println("Error cloning flight with ID " + f.getId() + " in getFlightsForPassenger: " + e.getMessage());
                 }
             }
-            // Sorting by departure date: if passenger.getFlights() doesn't already do it.
-            // Example: flightCopies.sort(Comparator.comparing(Flight::getDepartureDate)); // Assumes Flight has getDepartureDate()
 
             return new Response("Flights for passenger " + passengerId + " retrieved successfully.", Status.SUCCESS, flightCopies);
 

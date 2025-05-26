@@ -103,10 +103,9 @@ public class LocationController implements LocationServices {
             }
 
             for (Location loc : locations) {
-                // Array: [ValueForComboBox, TextToDisplayInComboBox]
                 locationDisplayInfo.add(new String[]{
-                        loc.getAirportId(), // Value
-                        loc.getAirportId() + " - " + loc.getAirportName() // Display Text
+                        loc.getAirportId(), 
+                        loc.getAirportId() + " - " + loc.getAirportName() 
                 });
             }
 

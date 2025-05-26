@@ -61,9 +61,8 @@ public class FlightController implements FlightServices {
             if (depArrValidationResponse.getStatus() != Status.SUCCESS) return depArrValidationResponse;
 
             Response scaleLocResponse = flightValidator.validateAndGetLocation(scaleLocationIdStr, "Scale");
-            // If NOT_FOUND for scale, it means an invalid ID was provided. SUCCESS with null  means optional scale not chosen.
             if (scaleLocResponse.getStatus() == Status.NOT_FOUND) return scaleLocResponse; 
-            Location scaleLocation = (Location) scaleLocResponse.getObject(); // Will be null if optional scale not chosen & validated as such
+            Location scaleLocation = (Location) scaleLocResponse.getObject(); 
 
             Response scaleValidationResponse = flightValidator.validateScaleLocation(scaleLocation, departureLocation, arrivalLocation);
             if (scaleValidationResponse.getStatus() != Status.SUCCESS) return scaleValidationResponse;
@@ -93,7 +92,7 @@ public class FlightController implements FlightServices {
                 return new Response("Failed to save the flight. Storage error or conflict.", Status.INTERNAL_SERVER_ERROR);
             }
 
-            Flight flightCopy = (Flight) newFlight.clone(); // Assuming Flight implements Cloneable
+            Flight flightCopy = (Flight) newFlight.clone(); 
             return new Response("Flight created successfully.", Status.CREATED, flightCopy);
 
         }catch (Exception e) {
@@ -127,11 +126,11 @@ public class FlightController implements FlightServices {
     @Override
     public Response addPassengerToFlight(String flightId, long passengerId) {
         try {
-            // Basic validation for IDs can be done here or in a validator if complex
+        
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight ID must not be empty for adding passenger.", Status.BAD_REQUEST);
             }
-            // Assuming passengerId > 0 is a basic check
+            
             if (passengerId <=0) {
                  return new Response("Passenger ID must be valid.", Status.BAD_REQUEST);
             }
@@ -152,7 +151,7 @@ public class FlightController implements FlightServices {
             if (flight.getNumPassengers() >= flight.getPlane().getMaxCapacity()) {
                 return new Response("Flight is full. Cannot add more passengers.", Status.BAD_REQUEST);
             }
-            // Check if passenger is already on this flight (idempotency)
+
             if (passenger.getFlights().stream().anyMatch(f -> f.getId().equals(flight.getId()))) {
                 return new Response("Passenger " + passengerId + " is already on flight " + flightId + ".", Status.BAD_REQUEST);
             }
@@ -160,14 +159,14 @@ public class FlightController implements FlightServices {
             flight.addPassenger(passenger);
             passenger.addFlight(flight);
 
-            // Explicitly save changes
+      
             boolean flightUpdated = flightStorage.updateFlight(flight);
             boolean passengerUpdated = passengerStorage.updatePassenger(passenger);
 
             if (!flightUpdated || !passengerUpdated) {
-                // Attempt to rollback or log inconsistency
+                
                 System.err.println("Failed to fully persist passenger addition to flight. Data may be inconsistent.");
-                // Consider more sophisticated error handling/rollback
+             
                 return new Response("Error saving changes after adding passenger to flight.", Status.INTERNAL_SERVER_ERROR);
             }
 
